@@ -130,7 +130,7 @@ fi
 echo -en "Do you want MySQL monitoring? (y/n)? "
 read answer
 if echo "$answer" | grep -iq "^y" ;then
-    echo "Enable MySQL Monitoring..."
+    echo "Creating necessary files and MySQL User..."
 
     touch /var/lib/zabbix/.my.cnf
 
@@ -149,7 +149,7 @@ if echo "$answer" | grep -iq "^y" ;then
     mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'zabbix'@'localhost';"
     mysql -e "FLUSH PRIVILEGES;"
 
-    echo "MySQL user created."
+    echo "Files and MySQL user created."
 
 else
       echo -e "Ok."
