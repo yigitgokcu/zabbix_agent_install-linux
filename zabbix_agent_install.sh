@@ -39,8 +39,9 @@ isRoot
 SERVER_IP=$1
 HOST_NAME=$(hostname)
 HOST_IP=$(hostname -I | cut -d' ' -f1)
+PASS="$(openssl rand -base64 12)"
 
-# Our Zabbix Server IP address is 178.18.193.170 !
+# Our Zabbix Server IP address is 178.18.193.70 !
 
 # Secure agent
 PSKIdentity=${HOST_NAME%.*.*}
@@ -77,7 +78,7 @@ chown -R zabbix:zabbix /var/lib/zabbix
 
 # Configure firewalld
 # ---------------------------------------------------\
-firewall-cmd --permanent --zone=public --add-rich-rule 'rule family="ipv4" source address="178.18.193.170" port protocol="tcp" port="10050" accept'
+firewall-cmd --permanent --zone=public --add-rich-rule 'rule family="ipv4" source address="178.18.193.70" port protocol="tcp" port="10050" accept'
 firewall-cmd --reload
 
 # Enable and start agent
@@ -125,6 +126,29 @@ if echo "$answer" | grep -iq "^y" ;then
 else
       echo -e "Ok."
 fi
+# For MySQL Monitoring
+echo -en "Do you want Zabbix to monitor your MySQL? (y/n)? "
+read answer
+if echo "$answer" | grep -iq "^y" ;then
+    echo "Creating MySQL user..."
+
+    touch /var/lib/zabbix/.my.cnf
+
+    echo "[client]
+    user=zabbix
+    password=$PASS" >> /var/lib/zabbix/.my.cnf
+
+    chown -R zabbix:zabbix /var/lib/zabbix/.my.cnf
+    
+    mysql -e "CREATE USER zabbix@localhost IDENTIFIED BY '$PASS';"
+    mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'zabbix'@'localhost';"
+    mysql -e "FLUSH PRIVILEGES;"
+
+    echo "MySQL user created."
+
+else
+      echo -e "Ok."
+fi
 
 # Final
 # ---------------------------------------------------\
@@ -133,3 +157,4 @@ Info "Done!"
 Info "Now, you must add this host to your Zabbix server in the Configuration > Hosts area"
 Info "This server ip - $HOST_IP"
 Info "This server name - $HOST_NAME"
+Info "MySQL Zabbix User Password - $PASS"
