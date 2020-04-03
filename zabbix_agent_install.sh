@@ -127,10 +127,10 @@ else
       echo -e "Ok."
 fi
 # For MySQL Monitoring
-echo -en "Do you want Zabbix to monitor your MySQL? (y/n)? "
+echo -en "Do you want MySQL monitoring? (y/n)? "
 read answer
 if echo "$answer" | grep -iq "^y" ;then
-    echo "Creating MySQL user..."
+    echo "Enable MySQL Monitoring..."
 
     touch /var/lib/zabbix/.my.cnf
 
@@ -139,6 +139,11 @@ if echo "$answer" | grep -iq "^y" ;then
     password=$PASS" >> /var/lib/zabbix/.my.cnf
 
     chown -R zabbix:zabbix /var/lib/zabbix/.my.cnf
+    
+    wget https://github.com/yigitgokcu/zabbix-template-mysql-galera_cluster-linux/archive/master.zip -O /tmp/zabbix-mysql.zip
+    unzip -j /tmp/zabbix-mysql.zip -d /tmp/zabbix-mysql
+    cp /tmp/zabbix-mysql/userparameter_mysql.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+    rm -rf /tmp/zabbix-mysql*
     
     mysql -e "CREATE USER zabbix@localhost IDENTIFIED BY '$PASS';"
     mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'zabbix'@'localhost';"
@@ -157,4 +162,3 @@ Info "Done!"
 Info "Now, you must add this host to your Zabbix server in the Configuration > Hosts area"
 Info "This server ip - $HOST_IP"
 Info "This server name - $HOST_NAME"
-Info "MySQL Zabbix User Password - $PASS"
