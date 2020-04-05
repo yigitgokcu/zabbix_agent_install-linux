@@ -41,8 +41,6 @@ HOST_NAME=$(hostname)
 HOST_IP=$(hostname -I | cut -d' ' -f1)
 PASS="$(openssl rand -base64 12)"
 
-# Our Zabbix Server IP address is 178.18.193.70 !
-
 # Secure agent
 PSKIdentity=${HOST_NAME%.*.*}
 TLSType="psk"
@@ -61,10 +59,35 @@ fi
 # Installation
 # ---------------------------------------------------\
 
+# Only run it on (RHEL/CentOS)
+
+if [ -x /usr/bin/yum ]; then
+
 yum install epel-release -y
-rpm -ivh https://repo.zabbix.com/zabbix/4.4/rhel/7/x86_64/zabbix-agent-4.4.7-1.el7.x86_64.rpm
+rpm -Uvh https://repo.zabbix.com/zabbix/4.4/rhel/7/x86_64/zabbix-release-4.4-1.el7.noarch.rpm
+yum clean all
 
 yum install zabbix-agent -y
+fi
+
+# Only run it on (Ubuntu/Debian)
+
+if [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o xenial) ==  "Xenial" ] ; then
+  
+  wget https://repo.zabbix.com/zabbix/4.4/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.4-1+xenial_all.deb 
+  dpkg -i zabbix-release_4.4-1+xenial_all.deb
+  
+elif [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o bionic) ==  "Bionic" ]; then
+  wget wget https://repo.zabbix.com/zabbix/4.4/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.4-1+bionic_all.deb
+  dpkg -i zabbix-release_4.4-1+bionic_all.deb
+
+  apt-get update
+  apt install zabbix-agent -y
+  apt remove ufw -y && apt purge ufw -y
+  apt install firewalld -y
+  rm -rf zabbix-release_*
+
+fi
 
 # Configure local zabbix agent
 sed -i "s/^\(Server=\).*/\1"$SERVER_IP"/" /etc/zabbix/zabbix_agentd.conf
@@ -78,7 +101,7 @@ chown -R zabbix:zabbix /var/lib/zabbix
 
 # Configure firewalld
 # ---------------------------------------------------\
-firewall-cmd --permanent --zone=public --add-rich-rule 'rule family="ipv4" source address="178.18.193.70" port protocol="tcp" port="10050" accept'
+firewall-cmd --permanent --zone=public --add-rich-rule 'rule family="ipv4" source address="$SERVER_IP" port protocol="tcp" port="10050" accept'
 firewall-cmd --reload
 
 # Enable and start agent
@@ -155,10 +178,13 @@ else
       echo -e "Ok."
 fi
 
+systemctl restart zabbix-agent
+
 # Final
 # ---------------------------------------------------\
 echo -e ""
 Info "Done!"
+Info "$(systemctl status zabbix-agent | awk 'NR==3')"
 Info "Now, you must add this host to your Zabbix server in the Configuration > Hosts area"
 Info "This server ip - $HOST_IP"
 Info "This server name - $HOST_NAME"
