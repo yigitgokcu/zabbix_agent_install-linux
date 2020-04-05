@@ -83,8 +83,12 @@ elif [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'
 
   apt-get update
   apt install zabbix-agent -y
+  
+  # Remove UFW and install Firewalld
   apt remove ufw -y && apt purge ufw -y
   apt install firewalld -y
+  
+  # Delete unnecessary files
   rm -rf zabbix-release_*
 
 fi
@@ -191,4 +195,6 @@ Info "$(systemctl status zabbix-agent | awk 'NR==3')"
 Info "Now, you must add this host to your Zabbix server in the Configuration > Hosts area"
 Info "This server ip - $HOST_IP"
 Info "This server name - $HOST_NAME"
+
+# Self Destruct
 rm $0
