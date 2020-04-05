@@ -178,6 +178,9 @@ else
       echo -e "Ok."
 fi
 
+# We can add more choice for service monitoring in here.
+# ---------------------------------------------------\
+
 systemctl restart zabbix-agent
 
 # Final
