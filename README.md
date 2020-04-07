@@ -1,1 +1,1 @@
-# Zabbix Agent Installation Script for CentOS
+# Zabbix Agent Installation Script
