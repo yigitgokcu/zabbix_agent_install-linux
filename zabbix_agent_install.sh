@@ -68,6 +68,19 @@ rpm -Uvh https://repo.zabbix.com/zabbix/4.4/rhel/7/x86_64/zabbix-release-4.4-1.e
 yum clean all
 
 yum install zabbix-agent -y
+
+# For PHP-FPM Monitoring
+yum install unzip grep gawk lsof jq fcgi -y
+
+  # For Pending Update Monitoring (RHEL/CentOS)
+  wget https://github.com/yigitgokcu/zabbix-template-check-updates-linux/archive/master.zip -O /tmp/zabbix-template-check-updates.zip
+  unzip -j /tmp/zabbix-template-check-updates.zip -d /tmp/zabbix-template-check-updates
+  cp /tmp/zabbix-template-check-updates/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+  rm -rf /tmp/zabbix-template-check-updates*
+
+  # Add CronJob (RHEL/CentOS)
+  (crontab -u root -l; echo "0 4 * * * yum check-update --quiet | grep '^[a-Z0-9]' | wc -l > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
+
 fi
 
 # Only run it on (Ubuntu/Debian)
@@ -84,12 +97,24 @@ elif [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'
   apt-get update
   apt install zabbix-agent -y
   
+  # For PHP-FPM Monitoring
+  apt-get -y install grep gawk lsof jq libfcgi0ldbl
+  
   # Remove UFW and install Firewalld
   apt remove ufw -y && apt purge ufw -y
   apt install firewalld -y
   
   # Delete unnecessary files
   rm -rf zabbix-release_*
+
+  # For Pending Update Monitoring (Ubuntu/Debian)
+  wget https://codeload.github.com/yigitgokcu/zabbix-template-check-updates-linux/zip/master?token=AOGIAQLEHMZGKTMVOOB75WK6SYTSW -O /tmp/zabbix-template-check-updates.zip
+  unzip -j /tmp/zabbix-template-check-updates.zip -d /tmp/zabbix-template-check-updates
+  cp /tmp/zabbix-template-check-updates/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+  rm -rf /tmp/zabbix-template-check-updates*
+
+  # Add CronJob (Ubuntu/Debian)
+  (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d" " -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
 
 fi
 
@@ -121,7 +146,7 @@ systemctl enable zabbix-agent && systemctl start zabbix-agent
 echo -en "Secure agent? (y/n)? "
 read answer
 if echo "$answer" | grep -iq "^y" ;then
-    echo "Generate PSK..."
+    echo "Generating PSK..."
 
     sh -c "openssl rand -hex 32 > /etc/zabbix/zabbix_agentd.psk"
 
@@ -140,10 +165,10 @@ else
 fi
 
 # Active agent (EnableRemoteCommands)
-echo -en "Enable active agent feature? (y/n)? "
+echo -en "Enabling active agent feature? (y/n)? "
 read answer
 if echo "$answer" | grep -iq "^y" ;then
-    echo "Enable active agent..."
+    echo "Enabling active agent..."
 
     sed -i 's/# EnableRemoteCommands=.*/EnableRemoteCommands=1/' /etc/zabbix/zabbix_agentd.conf
     sed -i 's/# LogRemoteCommands=.*/LogRemoteCommands=1/' /etc/zabbix/zabbix_agentd.conf
@@ -181,6 +206,27 @@ if echo "$answer" | grep -iq "^y" ;then
 else
       echo -e "Ok."
 fi
+
+# For PHP-FPM Monitoring
+echo -en "Do you want PHP-FPM monitoring? (y/n)? "
+read answer
+if echo "$answer" | grep -iq "^y" ;then
+    echo "Creating necessary files..."
+
+    wget https://github.com/yigitgokcu/zabbix-template-phpfpm-linux/archive/master.zip -O /tmp/zabbix-php-fpm.zip
+    unzip -j /tmp/zabbix-php-fpm.zip -d /tmp/zabbix-php-fpm
+    cp /tmp/zabbix-php-fpm/userparameter_php_fpm.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+    cp /tmp/zabbix-php-fpm/zabbix_php_fpm_*.sh /var/lib/zabbix/scripts/
+    cp /tmp/zabbix-php-fpm/statistics.conf /etc/nginx/conf.d/ && service nginx restart
+    chown -R zabbix:zabbix /var/lib/zabbix/scripts/zabbix_php_fpm_*.sh
+    chmod +x /var/lib/zabbix/scripts/zabbix_php_fpm_*.sh
+
+    #Grant privileges to the PHP-FPM auto discovery script only
+    echo 'zabbix ALL = NOPASSWD: /var/lib/zabbix/scripts/zabbix_php_fpm_discovery.sh' >> /etc/sudoers
+    echo 'zabbix ALL = NOPASSWD: /var/lib/zabbix/scripts/zabbix_php_fpm_status.sh' >> /etc/sudoers
+
+    rm -rf /tmp/zabbix-php-fpm*
+fi    
 
 # We can add more choice for service monitoring in here.
 # ---------------------------------------------------\
