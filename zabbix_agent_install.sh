@@ -226,6 +226,12 @@ if echo "$answer" | grep -iq "^y" ;then
     echo 'zabbix ALL = NOPASSWD: /var/lib/zabbix/scripts/zabbix_php_fpm_status.sh' >> /etc/sudoers
 
     rm -rf /tmp/zabbix-php-fpm*
+
+    echo "Files are created."
+
+else
+    echo -e "Ok."
+
 fi    
 
 # We can add more choice for service monitoring in here.
