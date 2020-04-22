@@ -108,7 +108,7 @@ elif [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'
   rm -rf zabbix-release_*
 
   # For Pending Update Monitoring (Ubuntu/Debian)
-  wget https://codeload.github.com/yigitgokcu/zabbix-template-check-updates-linux/zip/master?token=AOGIAQLEHMZGKTMVOOB75WK6SYTSW -O /tmp/zabbix-template-check-updates.zip
+  wget https://github.com/yigitgokcu/zabbix-template-check-updates-linux/archive/master.zip
   unzip -j /tmp/zabbix-template-check-updates.zip -d /tmp/zabbix-template-check-updates
   cp /tmp/zabbix-template-check-updates/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
   rm -rf /tmp/zabbix-template-check-updates*
