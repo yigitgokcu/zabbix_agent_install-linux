@@ -130,7 +130,7 @@ chown -R zabbix:zabbix /var/lib/zabbix
 
 # Configure firewalld
 # ---------------------------------------------------\
-firewall-cmd --permanent --zone=public --add-rich-rule 'rule family="ipv4" source address="$SERVER_IP" port protocol="tcp" port="10050" accept'
+firewall-cmd --permanent --zone=public --add-rich-rule 'rule family="ipv4" source address="'$SERVER_IP'" port protocol="tcp" port="10050" accept'
 firewall-cmd --reload
 
 # Enable and start agent
