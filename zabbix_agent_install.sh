@@ -92,12 +92,31 @@ if [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| 
   apt-get update
   apt install zabbix-agent -y
   
+  # For PHP-FPM Monitoring
+  apt-get -y install grep gawk lsof jq libfcgi0ldbl
+  
+  # Remove UFW and install Firewalld
+  apt remove ufw -y && apt purge ufw -y
+  apt install firewalld -y
+  
+  # Delete unnecessary files
+  rm -rf zabbix-release_*
+
+  # For Pending Update Monitoring (Ubuntu/Debian)
+  wget https://github.com/yigitgokcu/zabbix-template-check-updates-linux/archive/master.zip
+  unzip -j /tmp/zabbix-template-check-updates.zip -d /tmp/zabbix-template-check-updates
+  cp /tmp/zabbix-template-check-updates/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+  rm -rf /tmp/zabbix-template-check-updates*
+
+  # Add CronJob (Ubuntu/Debian)
+  (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d" " -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
+  
 elif [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o bionic) ==  "Bionic" ]; then
+  
   wget wget https://repo.zabbix.com/zabbix/4.4/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.4-1+bionic_all.deb
   dpkg -i zabbix-release_4.4-1+bionic_all.deb
   apt-get update
   apt install zabbix-agent -y
-fi
 
   # For PHP-FPM Monitoring
   apt-get -y install grep gawk lsof jq libfcgi0ldbl
