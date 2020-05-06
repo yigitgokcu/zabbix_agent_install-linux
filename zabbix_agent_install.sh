@@ -119,7 +119,7 @@ elif [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'
   apt install zabbix-agent -y
 
   # For PHP-FPM Monitoring
-  apt-get -y install grep gawk lsof jq libfcgi0ldbl
+  apt-get -y install unzip grep gawk lsof jq libfcgi0ldbl
   
   # Remove UFW and install Firewalld
   apt remove ufw -y && apt purge ufw -y
