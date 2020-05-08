@@ -135,7 +135,7 @@ elif [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'
   rm -rf /tmp/zabbix-template-check-updates*
 
   # Add CronJob (Ubuntu/Debian)
-  (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d" " -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
+  (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d " " -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
 fi
 
 # Configure local zabbix agent
