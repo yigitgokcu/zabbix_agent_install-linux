@@ -64,7 +64,7 @@ fi
 if [ -x /usr/bin/yum ]; then
 
 yum install epel-release -y
-rpm -Uvh https://repo.zabbix.com/zabbix/4.4/rhel/7/x86_64/zabbix-release-4.4-1.el7.noarch.rpm
+rpm -Uvh https://repo.zabbix.com/zabbix/5.0/rhel/7/x86_64/zabbix-release-5.0-1.el7.noarch.rpm
 yum clean all
 
 yum install zabbix-agent -y
@@ -87,8 +87,8 @@ fi
 
 if [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o xenial) ==  "Xenial" ] ; then
   
-  wget https://repo.zabbix.com/zabbix/4.4/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.4-1+xenial_all.deb 
-  dpkg -i zabbix-release_4.4-1+xenial_all.deb
+  wget https://repo.zabbix.com/zabbix/5.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.0-1+xenial_all.deb 
+  dpkg -i zabbix-release_5.0-1+xenial_all.deb
   apt-get update
   apt install zabbix-agent -y
 
@@ -113,8 +113,8 @@ if [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| 
 
 elif [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o bionic) ==  "Bionic" ]; then
 
-  wget wget https://repo.zabbix.com/zabbix/4.4/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.4-1+bionic_all.deb
-  dpkg -i zabbix-release_4.4-1+bionic_all.deb
+  wget https://repo.zabbix.com/zabbix/5.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.0-1+bionic_all.deb
+  dpkg -i zabbix-release_5.0-1+bionic_all.deb
   apt-get update
   apt install zabbix-agent -y
 
