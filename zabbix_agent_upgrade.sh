@@ -170,6 +170,7 @@ systemctl restart zabbix-agent
 echo -e ""
 Info "Done!"
 Info "Zabbix Agent Status: $(systemctl status zabbix-agent | awk 'NR==3')"
+# Info "Zabbix Agent Status: $(systemctl status zabbix-agent2 | awk 'NR==3')" # for agent version 2
 Info "Now, you must add this host to your Zabbix server in the Configuration > Hosts area"
 Info "This server IP - $HOST_IP"
 Info "This server name - $HOST_NAME"
