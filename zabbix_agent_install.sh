@@ -46,7 +46,7 @@ PSKIdentity=${HOST_NAME%.*.*}
 TLSType="psk"
 RAND_PREFIX="-$TLSType-prefix-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)"
 
-if [[ -f /etc/zabbix/zabbix_agentd.conf ]]; then
+if [[ -f /etc/zabbix/zabbix_agent*.conf ]]; then
 	echo "Zabbix agent already installed!"
 	exit 1
 fi
@@ -68,6 +68,7 @@ rpm -Uvh https://repo.zabbix.com/zabbix/5.0/rhel/7/x86_64/zabbix-release-5.0-1.e
 yum clean all
 
 yum install zabbix-agent -y
+# yum install zabbix-agent2 -y # for zabbix-agent to zabbix-agent2
 
 # For PHP-FPM Monitoring
 yum install unzip grep gawk lsof jq fcgi -y
@@ -116,7 +117,9 @@ elif [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'
   wget https://repo.zabbix.com/zabbix/5.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.0-1+bionic_all.deb
   dpkg -i zabbix-release_5.0-1+bionic_all.deb
   apt-get update
+
   apt install zabbix-agent -y
+  # apt install zabbix-agent2 -y # for zabbix-agent to zabbix-agent2
 
   # For PHP-FPM Monitoring
   apt-get -y install grep gawk lsof jq libfcgi0ldbl
@@ -139,9 +142,9 @@ elif [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'
 fi
 
 # Configure local zabbix agent
-sed -i "s/^\(Server=\).*/\1"$SERVER_IP"/" /etc/zabbix/zabbix_agentd.conf
-sed -i "s/^\(ServerActive\).*/\1="$SERVER_IP"/" /etc/zabbix/zabbix_agentd.conf
-sed -i "s/^\(Hostname\).*/\1="$HOST_NAME"/" /etc/zabbix/zabbix_agentd.conf
+sed -i "s/^\(Server=\).*/\1"$SERVER_IP"/" /etc/zabbix/zabbix_agent*.conf
+sed -i "s/^\(ServerActive\).*/\1="$SERVER_IP"/" /etc/zabbix/zabbix_agent*.conf
+sed -i "s/^\(Hostname\).*/\1="$HOST_NAME"/" /etc/zabbix/zabbix_agent*.conf
 
 # Creating Directories
 mkdir /var/lib/zabbix
@@ -166,29 +169,29 @@ fi
 
 # Enable and start agent
 # ---------------------------------------------------\
-systemctl enable zabbix-agent && systemctl start zabbix-agent
+systemctl enable zabbix-agent* && systemctl start zabbix-agent*
 
 # PSK
 # TLSConnect=psk
 # TLSAccept=psk
 # TLSPSKIdentity=psk001
-# TLSPSKFile=/etc/zabbix/zabbix_agentd.psk
+# TLSPSKFile=/etc/zabbix/zabbix_agent.psk
 # ---------------------------------------------------\
 echo -en "Secure agent? (y/n)? "
 read answer
 if echo "$answer" | grep -iq "^y" ;then
     echo "Generating PSK..."
 
-    sh -c "openssl rand -hex 32 > /etc/zabbix/zabbix_agentd.psk"
+    sh -c "openssl rand -hex 32 > /etc/zabbix/zabbix_agent.psk"
 
-    sed -i 's/# TLSConnect=.*/TLSConnect=psk/' /etc/zabbix/zabbix_agentd.conf
-    sed -i 's/# TLSAccept=.*/TLSAccept=psk/' /etc/zabbix/zabbix_agentd.conf
-    sed -i 's/# TLSPSKFile=.*/TLSPSKFile=\/etc\/zabbix\/zabbix_agentd.psk/' /etc/zabbix/zabbix_agentd.conf
-    sed -i "s/# TLSPSKIdentity=.*/TLSPSKIdentity="$PSKIdentity$RAND_PREFIX"/" /etc/zabbix/zabbix_agentd.conf
+    sed -i 's/# TLSConnect=.*/TLSConnect=psk/' /etc/zabbix/zabbix_agent*.conf
+    sed -i 's/# TLSAccept=.*/TLSAccept=psk/' /etc/zabbix/zabbix_agent*.conf
+    sed -i 's/# TLSPSKFile=.*/TLSPSKFile=\/etc\/zabbix\/zabbix_agent.psk/' /etc/zabbix/zabbix_agent*.conf
+    sed -i "s/# TLSPSKIdentity=.*/TLSPSKIdentity="$PSKIdentity$RAND_PREFIX"/" /etc/zabbix/zabbix_agent*.conf
 
-    systemctl restart zabbix-agent
+    systemctl restart zabbix-agent*
 
-    Info "PSK - $(cat /etc/zabbix/zabbix_agentd.psk)"
+    Info "PSK - $(cat /etc/zabbix/zabbix_agent.psk)"
     Info "PSKIdentity - $PSKIdentity$RAND_PREFIX"
 
 else
@@ -201,10 +204,10 @@ read answer
 if echo "$answer" | grep -iq "^y" ;then
     echo "Enabling active agent..."
 
-    sed -i 's/# EnableRemoteCommands=.*/EnableRemoteCommands=1/' /etc/zabbix/zabbix_agentd.conf
-    sed -i 's/# LogRemoteCommands=.*/LogRemoteCommands=1/' /etc/zabbix/zabbix_agentd.conf
-    sed -i 's/# User=zabbix.*/User=zabbix/' /etc/zabbix/zabbix_agentd.conf
-    sed -i 's/# Timeout=3.*/Timeout=30/' /etc/zabbix/zabbix_agentd.conf
+    sed -i 's/DenyKey=.*/# DenyKey=system.run[*]/' /etc/zabbix/zabbix_agent*.conf
+    sed -i 's/# Plugins.SystemRun.LogRemoteCommands=.*/Plugins.SystemRun.LogRemoteCommands=1/' /etc/zabbix/zabbix_agent*.conf
+    sed -i 's/# User=zabbix.*/User=zabbix/' /etc/zabbix/zabbix_agent*.conf # not working with agent version 2
+    sed -i 's/# Timeout=3.*/Timeout=30/' /etc/zabbix/zabbix_agent*.conf
 
 else
       echo -e "Nothing to do."
@@ -268,13 +271,13 @@ fi
 # We can add more choice for service monitoring in here.
 # ---------------------------------------------------\
 
-systemctl restart zabbix-agent
+systemctl restart zabbix-agent*
 
 # Final
 # ---------------------------------------------------\
 echo -e ""
 Info "Done!"
-Info "Zabbix Agent Status: $(systemctl status zabbix-agent | awk 'NR==3')"
+Info "Zabbix Agent Status: $(systemctl status zabbix-agent* | awk 'NR==3')"
 Info "Now, you must add this host to your Zabbix server in the Configuration > Hosts area"
 Info "This server ip - $HOST_IP"
 Info "This server name - $HOST_NAME"
