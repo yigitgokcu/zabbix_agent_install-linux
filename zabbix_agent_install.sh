@@ -169,7 +169,8 @@ fi
 
 # Enable and start agent
 # ---------------------------------------------------\
-systemctl enable zabbix-agent* && systemctl start zabbix-agent*
+systemctl enable zabbix-agent && systemctl start zabbix-agent
+# systemctl enable zabbix-agent2 && systemctl start zabbix-agent2 # for agent version 2
 
 # PSK
 # TLSConnect=psk
@@ -189,7 +190,8 @@ if echo "$answer" | grep -iq "^y" ;then
     sed -i 's/# TLSPSKFile=.*/TLSPSKFile=\/etc\/zabbix\/zabbix_agent.psk/' /etc/zabbix/zabbix_agent*.conf
     sed -i "s/# TLSPSKIdentity=.*/TLSPSKIdentity="$PSKIdentity$RAND_PREFIX"/" /etc/zabbix/zabbix_agent*.conf
 
-    systemctl restart zabbix-agent*
+    systemctl restart zabbix-agent
+    # systemctl restart zabbix-agent2 # for agent version 2
 
     Info "PSK - $(cat /etc/zabbix/zabbix_agent.psk)"
     Info "PSKIdentity - $PSKIdentity$RAND_PREFIX"
@@ -271,13 +273,15 @@ fi
 # We can add more choice for service monitoring in here.
 # ---------------------------------------------------\
 
-systemctl restart zabbix-agent*
+systemctl restart zabbix-agent
+# systemctl restart zabbix-agent2 # for agent version 2
 
 # Final
 # ---------------------------------------------------\
 echo -e ""
 Info "Done!"
-Info "Zabbix Agent Status: $(systemctl status zabbix-agent* | awk 'NR==3')"
+Info "Zabbix Agent Status: $(systemctl status zabbix-agent | awk 'NR==3')"
+# Info "Zabbix Agent Status: $(systemctl status zabbix-agent2 | awk 'NR==3')" # for agent version 2
 Info "Now, you must add this host to your Zabbix server in the Configuration > Hosts area"
 Info "This server IP - $HOST_IP"
 Info "This server name - $HOST_NAME"
