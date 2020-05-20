@@ -90,7 +90,7 @@ if [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| 
 
   # Delete unnecessary files
   rm -rf zabbix-release_* 
-  rm -rf /etc/zabbix/zabbix_agent*.conf.rpmnew 
+  rm -rf /etc/zabbix/zabbix_agent*.conf.dpkg-dist
 
 elif [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o bionic) ==  "Bionic" ]; then
 
@@ -106,7 +106,7 @@ elif [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'
   # Delete unnecessary files
   rm -rf zabbix-release_*
   # rm -rf /etc/zabbix/zabbix_agentd /etc/zabbix/zabbix_agentd.conf # for zabbix-agent to zabbix-agent2
-  rm -rf /etc/zabbix/zabbix_agent*.conf.rpmnew
+  rm -rf /etc/zabbix/zabbix_agent*.conf.dpkg-dist
 fi
 
 # Configure local zabbix agent
