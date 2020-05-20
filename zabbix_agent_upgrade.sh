@@ -76,7 +76,7 @@ yum upgrade zabbix-agent -y # for zabbix-agent v4.4 to v5.0
 
 # Delete unnecessary files
 # rm -rf /etc/zabbix/zabbix_agentd /etc/zabbix/zabbix_agentd.conf # for zabbix-agent to zabbix-agent2
-rm -rf /etc/zabbix/zabbix_agentd.conf.rpmnew 
+rm -rf /etc/zabbix/zabbix_agent*.conf.rpmnew 
 
 fi
 # Only run it on (Ubuntu/Debian)
@@ -90,7 +90,7 @@ if [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| 
 
   # Delete unnecessary files
   rm -rf zabbix-release_* 
-  rm -rf /etc/zabbix/zabbix_agentd.conf.rpmnew 
+  rm -rf /etc/zabbix/zabbix_agent*.conf.rpmnew 
 
 elif [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o bionic) ==  "Bionic" ]; then
 
@@ -105,8 +105,8 @@ elif [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'
 
   # Delete unnecessary files
   rm -rf zabbix-release_*
- # rm -rf /etc/zabbix/zabbix_agentd /etc/zabbix/zabbix_agentd.conf # for zabbix-agent to zabbix-agent2
-  rm -rf /etc/zabbix/zabbix_agentd.conf.rpmnew
+  # rm -rf /etc/zabbix/zabbix_agentd /etc/zabbix/zabbix_agentd.conf # for zabbix-agent to zabbix-agent2
+  rm -rf /etc/zabbix/zabbix_agent*.conf.rpmnew
 fi
 
 # Configure local zabbix agent
@@ -116,7 +116,8 @@ sed -i "s/^\(Hostname\).*/\1="$HOST_NAME"/" /etc/zabbix/zabbix_agent*.conf
 
 # Enable and start agent
 # ---------------------------------------------------\
-systemctl enable zabbix-agent* && systemctl start zabbix-agent*
+systemctl enable zabbix-agent && systemctl start zabbix-agent
+# systemctl enable zabbix-agent2 && systemctl start zabbix-agent2 # for zabbix-agent to zabbix-agent2
 
 # PSK
 # TLSConnect=psk
@@ -136,7 +137,8 @@ if echo "$answer" | grep -iq "^y" ;then
     sed -i 's/# TLSPSKFile=.*/TLSPSKFile=\/etc\/zabbix\/zabbix_agent.psk/' /etc/zabbix/zabbix_agent*.conf
     sed -i "s/# TLSPSKIdentity=.*/TLSPSKIdentity="$PSKIdentity$RAND_PREFIX"/" /etc/zabbix/zabbix_agent*.conf
 
-    systemctl restart zabbix-agent*
+    systemctl restart zabbix-agent
+    # systemctl restart zabbix-agent2 # for zabbix-agent to zabbix-agent2
 
     Info "PSK - $(cat /etc/zabbix/zabbix_agent.psk)"
     Info "PSKIdentity - $PSKIdentity$RAND_PREFIX"
@@ -160,13 +162,14 @@ else
       echo -e "Nothing to do."
 fi
 
-systemctl restart zabbix-agent*
+systemctl restart zabbix-agent
+# systemctl restart zabbix-agent2 # for zabbix-agent to zabbix-agent2
 
 # Final
 # ---------------------------------------------------\
 echo -e ""
 Info "Done!"
-Info "Zabbix Agent Status: $(systemctl status zabbix-agent* | awk 'NR==3')"
+Info "Zabbix Agent Status: $(systemctl status zabbix-agent | awk 'NR==3')"
 Info "Now, you must add this host to your Zabbix server in the Configuration > Hosts area"
 Info "This server IP - $HOST_IP"
 Info "This server name - $HOST_NAME"
