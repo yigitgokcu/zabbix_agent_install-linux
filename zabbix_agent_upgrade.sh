@@ -79,7 +79,7 @@ yum upgrade zabbix-agent -y # for zabbix-agent v4.4 to v5.0
 rm -rf /etc/zabbix/zabbix_agent*.conf.rpmnew 
 
 fi
-# Only run it on (Ubuntu/Debian)
+# Only run it on (Ubuntu)
 
 if [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o xenial) ==  "Xenial" ] ; then
   
