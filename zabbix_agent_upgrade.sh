@@ -46,10 +46,6 @@ PSKIdentity=${HOST_NAME%.*.*}
 TLSType="psk"
 RAND_PREFIX="-$TLSType-prefix-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)"
 
-if [[ -f /etc/zabbix/zabbix_agent*.conf ]]; then
-	echo "Zabbix agent already installed!"
-	exit 1
-fi
 
 if [ -z "$1" ]; then
     Error "\nPlease call '$0 <Zabbix Server IP>' to run this command!\n"
@@ -79,9 +75,9 @@ yum upgrade zabbix-agent -y # for zabbix-agent v4.4 to v5.0
 rm -rf /etc/zabbix/zabbix_agent*.conf.rpmnew 
 
 fi
-# Only run it on (Ubuntu)
+# Only run it on (Ubuntu/Debian)
 
-if [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o xenial) ==  "Xenial" ] ; then
+if [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o xenial) == "Xenial" ] ; then
   
   wget https://repo.zabbix.com/zabbix/5.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.0-1+xenial_all.deb 
   dpkg -i zabbix-release_5.0-1+xenial_all.deb
@@ -92,7 +88,7 @@ if [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| 
   rm -rf zabbix-release_* 
   rm -rf /etc/zabbix/zabbix_agent*.conf.dpkg-dist
 
-elif [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o bionic) ==  "Bionic" ]; then
+elif [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o bionic) == "Bionic" ]; then
 
   # systemctl stop zabbix-agent # for zabbix-agent to zabbix-agent2
   # apt remove zabbix-agent # for zabbix-agent to zabbix-agent2
