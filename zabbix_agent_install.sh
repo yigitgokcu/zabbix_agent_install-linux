@@ -84,7 +84,7 @@ yum install unzip grep gawk lsof jq fcgi -y
 
 fi
 
-# Only run it on (Ubuntu)
+# Only run it on (Ubuntu/Debian)
 
 if [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o xenial) ==  "Xenial" ] ; then
   
@@ -233,7 +233,7 @@ if echo "$answer" | grep -iq "^y" ;then
     cp /tmp/zabbix-mysql/userparameter_mysql.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
     rm -rf /tmp/zabbix-mysql*
     
-    mysql -e "CREATE USER zabbix@localhost IDENTIFIED BY '$PASS';"
+    mysql -e "CREATE USER 'zabbix'@'localhost' IDENTIFIED BY '$PASS';"
     mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'zabbix'@'localhost';"
     mysql -e "FLUSH PRIVILEGES;"
 
@@ -242,6 +242,24 @@ if echo "$answer" | grep -iq "^y" ;then
 else
       echo -e "Nothing to do."
 fi
+
+# For NGINX Monitoring
+echo -en "Do you want NGINX monitoring? (y/n)? "
+read answer
+if echo "$answer" | grep -iq "^y" ;then
+    echo "Creating necessary files..."
+
+    wget https://github.com/yigitgokcu/zabbix-template-nginx-linux/archive/master.zip -O /tmp/zabbix-nginx.zip
+    unzip -j /tmp/zabbix-nginx.zip -d /tmp/zabbix-nginx
+    cp /tmp/zabbix-nginx/statistics.conf /etc/nginx/conf.d/ && service nginx restart
+    rm -rf /tmp/zabbix-nginx*
+     
+    echo "Done."
+
+else
+    echo -e "Nothing to do."
+
+fi    
 
 # For PHP-FPM Monitoring
 echo -en "Do you want PHP-FPM monitoring? (y/n)? "
@@ -256,12 +274,37 @@ if echo "$answer" | grep -iq "^y" ;then
     cp /tmp/zabbix-php-fpm/statistics.conf /etc/nginx/conf.d/ && service nginx restart
     chown -R zabbix:zabbix /var/lib/zabbix/scripts/zabbix_php_fpm_*.sh
     chmod +x /var/lib/zabbix/scripts/zabbix_php_fpm_*.sh
-
+    rm -rf /tmp/zabbix-php-fpm*
+    
     #Grant privileges to the PHP-FPM auto discovery script only
     echo 'zabbix ALL = NOPASSWD: /var/lib/zabbix/scripts/zabbix_php_fpm_discovery.sh' >> /etc/sudoers
     echo 'zabbix ALL = NOPASSWD: /var/lib/zabbix/scripts/zabbix_php_fpm_status.sh' >> /etc/sudoers
 
-    rm -rf /tmp/zabbix-php-fpm*
+    echo "Done."
+
+else
+    echo -e "Nothing to do."
+
+fi    
+
+# For Cpanel Monitoring
+echo -en "Do you want Cpanel monitoring? (y/n)? "
+read answer
+if echo "$answer" | grep -iq "^y" ;then
+    echo "Creating necessary files..."
+
+wget https://github.com/yigitgokcu/zabbix-template-cpanel-linux/archive/master.zip -O /tmp/zabbix-template-cpanel-linux.zip
+unzip -j /tmp/zabbix-template-cpanel-linux.zip -d /tmp/zabbix-template-cpanel-linux
+cp /tmp/zabbix-template-cpanel-linux/userparameter_cpanel.conf  $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+cp /tmp/zabbix-template-cpanel-linux/zabbix_exim-* /var/lib/zabbix/scripts/
+rm -rf /tmp/zabbix-template-cpanel-linux*
+chown -R zabbix:zabbix /var/lib/zabbix/scripts/zabbix_exim-*
+chmod a+x /var/lib/zabbix/scripts/zabbix_exim-*
+
+echo 'zabbix ALL=(ALL) NOPASSWD: /usr/sbin/exim -bp' >> /etc/sudoers
+echo 'zabbix ALL=(ALL) NOPASSWD: /usr/sbin/whmapi1' >> /etc/sudoers
+echo 'zabbix ALL=(ALL) NOPASSWD: /var/lib/zabbix/scripts/zabbix_exim-delete-frozen.sh' >> /etc/sudoers
+echo 'zabbix ALL=(ALL) NOPASSWD: /var/lib/zabbix/scripts/zabbix_exim-find-spammer.py' >> /etc/sudoers
 
     echo "Done."
 
