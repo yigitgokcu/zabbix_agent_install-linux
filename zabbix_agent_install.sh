@@ -97,8 +97,8 @@ if [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| 
   apt-get -y install unzip grep gawk lsof jq libfcgi0ldbl
   
   # Remove UFW and install Firewalld
-  apt remove ufw -y && apt purge ufw -y
-  apt install firewalld -y
+  #apt remove ufw -y && apt purge ufw -y
+  #apt install firewalld -y
   
   # Delete unnecessary files
   rm -rf zabbix-release_*
@@ -125,8 +125,8 @@ elif [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'
   apt-get -y install grep gawk lsof jq libfcgi0ldbl
   
   # Remove UFW and install Firewalld
-  apt remove ufw -y && apt purge ufw -y
-  apt install firewalld -y
+  #apt remove ufw -y && apt purge ufw -y
+  #apt install firewalld -y
   
   # Delete unnecessary files
   rm -rf zabbix-release_*
