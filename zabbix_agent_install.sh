@@ -97,8 +97,8 @@ if [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| 
   apt-get -y install unzip grep gawk lsof jq libfcgi0ldbl
   
   # Remove UFW and install Firewalld
-  #apt remove ufw -y && apt purge ufw -y
-  #apt install firewalld -y
+  # apt remove ufw -y && apt purge ufw -y
+  # apt install firewalld -y
   
   # Delete unnecessary files
   rm -rf zabbix-release_*
@@ -125,8 +125,8 @@ elif [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'
   apt-get -y install grep gawk lsof jq libfcgi0ldbl
   
   # Remove UFW and install Firewalld
-  #apt remove ufw -y && apt purge ufw -y
-  #apt install firewalld -y
+  # apt remove ufw -y && apt purge ufw -y
+  # apt install firewalld -y
   
   # Delete unnecessary files
   rm -rf zabbix-release_*
@@ -313,6 +313,27 @@ else
     echo -e "Nothing to do."
 
 fi    
+
+# For Advanced Disk Monitoring
+echo -en "Do you want advanced disk monitoring? (y/n)? "
+read answer
+if echo "$answer" | grep -iq "^y" ;then
+    echo "Creating necessary files..."
+
+wget https://github.com/yigitgokcu/zabbix-template-disk-perfomance-linux/archive/master.zip -O /tmp/zabbix-disk-performance.zip
+unzip -j /tmp/zabbix-disk-performance -d /tmp/zabbix-disk-performance
+cp /tmp/zabbix-disk-performance/userparameter_check_disk_stat.conf  $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+cp /tmp/zabbix-disk-performance/zabbix_check_disk_stat.py /var/lib/zabbix/scripts/
+rm -rf /tmp/zabbix-disk-performance*
+chown -R zabbix:zabbix /var/lib/zabbix/scripts/zabbix_check_disk_stat.py
+chmod a+x /var/lib/zabbix/scripts/zabbix_check_disk_stat.py
+
+    echo "Done."
+
+else
+    echo -e "Nothing to do."
+
+fi
 
 # We can add more choice for service monitoring in here.
 # ---------------------------------------------------\
