@@ -335,6 +335,35 @@ else
 
 fi
 
+# For Postfix Monitoring
+echo -en "Do you want Postfix monitoring? (y/n)? "
+read answer
+if echo "$answer" | grep -iq "^y" ;then
+    echo "Creating necessary files..."
+
+wget https://github.com/yigitgokcu/zabbix-template-postfix-linux/archive/master.zip -O /tmp/zabbix-postfix.zip
+unzip -j /tmp/zabbix-postfix.zip -d /tmp/zabbix-postfix
+cp /tmp/zabbix-postfix/userparamater_postfix.conf  $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+cp /tmp/zabbix-postfix/pygtail.py /var/lib/zabbix/scripts/
+cp /tmp/zabbix-postfix/zabbix-postfix-stats.sh /var/lib/zabbix/scripts/
+rm -rf /tmp/zabbix-postfix*
+chown -R zabbix:zabbix /var/lib/zabbix/scripts/zabbix-postfix-stats.sh
+chmod a+x /var/lib/zabbix/scripts/zabbix-postfix-stats.sh
+chown -R zabbix:zabbix /var/lib/zabbix/scripts/pygtail.py 
+chmod a+x /var/lib/zabbix/scripts/pygtail.py
+
+
+# Grant privileges to the script only
+echo 'zabbix  ALL=(ALL) NOPASSWD: /var/lib/zabbix/scripts/zabbix-postfix-stats.sh' >> /etc/sudoers  
+
+
+    echo "Done."
+
+else
+    echo -e "Nothing to do."
+
+fi
+
 # We can add more choice for service monitoring in here.
 # ---------------------------------------------------\
 
