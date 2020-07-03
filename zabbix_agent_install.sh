@@ -153,7 +153,7 @@ chown -R zabbix:zabbix /var/lib/zabbix/
 
 # Configure firewalld
 # ---------------------------------------------------\
-echo -en "Configure Firewalld (y/n)? "
+echo -en "Do you want to configure Firewalld (y/n)? "
 read answer
 if echo "$answer" | grep -iq "^y" ;then
     echo "Configuring..."
@@ -178,7 +178,7 @@ systemctl enable zabbix-agent && systemctl start zabbix-agent
 # TLSPSKIdentity=psk001
 # TLSPSKFile=/etc/zabbix/zabbix_agent.psk
 # ---------------------------------------------------\
-echo -en "Secure agent? (y/n)? "
+echo -en "Do you want to secure agent? (y/n)? "
 read answer
 if echo "$answer" | grep -iq "^y" ;then
     echo "Generating PSK..."
@@ -201,7 +201,7 @@ else
 fi
 
 # Active agent (EnableRemoteCommands)
-echo -en "Enabling active agent feature? (y/n)? "
+echo -en "Do you want to enable active agent feature? (y/n)? "
 read answer
 if echo "$answer" | grep -iq "^y" ;then
     echo "Enabling active agent..."
