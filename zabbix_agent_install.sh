@@ -82,9 +82,7 @@ yum install unzip grep gawk lsof jq fcgi -y
   # Add CronJob (RHEL/CentOS)
   (crontab -u root -l; echo "0 4 * * * yum check-update --quiet | grep '^[a-Z0-9]' | wc -l > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
 
-elif
-
-if [ -x /usr/bin/dnf ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '8') ==  "8" ] ; then
+elif [ -x /usr/bin/dnf ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '8') ==  "8" ] ; then
 
 dnf install epel-release -y
 rpm -Uvh https://repo.zabbix.com/zabbix/5.0/rhel/8/x86_64/zabbix-release-5.0-1.el8.noarch.rpm
