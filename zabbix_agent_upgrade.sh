@@ -80,7 +80,7 @@ elif [ -x /usr/bin/dnf ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| gr
 # dnf remove zabbix-agent -y # for zabbix-agent to zabbix-agent2
 
 dnf install epel-release -y
-rpm -Uvh https://repo.zabbix.com/zabbix/5.0/rhel/7/x86_64/zabbix-release-5.0-1.el7.noarch.rpm
+rpm -Uvh https://repo.zabbix.com/zabbix/5.0/rhel/8/x86_64/zabbix-release-5.0-1.el8.noarch.rpm
 dnf clean all
 
 dnf upgrade zabbix-agent -y # for zabbix-agent v4.4 to v5.0
