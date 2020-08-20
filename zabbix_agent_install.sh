@@ -61,7 +61,7 @@ fi
 
 # Only run it on (RHEL/CentOS)
 
-if [ -x /usr/bin/yum ]; then
+if [ -x /usr/bin/yum ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '7') ==  "7" ] ; then
 
 yum install epel-release -y
 rpm -Uvh https://repo.zabbix.com/zabbix/5.0/rhel/7/x86_64/zabbix-release-5.0-1.el7.noarch.rpm
@@ -81,6 +81,29 @@ yum install unzip grep gawk lsof jq fcgi -y
 
   # Add CronJob (RHEL/CentOS)
   (crontab -u root -l; echo "0 4 * * * yum check-update --quiet | grep '^[a-Z0-9]' | wc -l > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
+
+elif
+
+if [ -x /usr/bin/dnf ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '8') ==  "8" ] ; then
+
+dnf install epel-release -y
+rpm -Uvh https://repo.zabbix.com/zabbix/5.0/rhel/8/x86_64/zabbix-release-5.0-1.el8.noarch.rpm
+dnf clean all
+
+dnf install zabbix-agent -y
+# yum install zabbix-agent2 -y # for zabbix-agent to zabbix-agent2
+
+# For PHP-FPM Monitoring
+dnf install unzip grep gawk lsof jq fcgi -y
+
+  # For Pending Update Monitoring (RHEL/CentOS)
+  wget https://github.com/yigitgokcu/zabbix-template-check-updates-linux/archive/master.zip -O /tmp/zabbix-template-check-updates.zip
+  unzip -j /tmp/zabbix-template-check-updates.zip -d /tmp/zabbix-template-check-updates
+  cp /tmp/zabbix-template-check-updates/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+  rm -rf /tmp/zabbix-template-check-updates*
+
+  # Add CronJob (RHEL/CentOS)
+  (crontab -u root -l; echo "0 4 * * * yum check-update --quiet | grep '^[a-Z0-9]' | wc -l > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root -
 
 fi
 
