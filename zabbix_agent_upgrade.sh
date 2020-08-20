@@ -57,7 +57,7 @@ fi
 
 # Only run it on (RHEL/CentOS)
 
-if [ -x /usr/bin/yum ]; then
+if [ -x /usr/bin/yum ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '7') ==  "7" ] ; then
 
 # systemctl stop zabbix-agent # for zabbix-agent to zabbix-agent2
 # yum remove zabbix-agent -y # for zabbix-agent to zabbix-agent2
@@ -74,7 +74,25 @@ yum upgrade zabbix-agent -y # for zabbix-agent v4.4 to v5.0
 # rm -rf /etc/zabbix/zabbix_agentd /etc/zabbix/zabbix_agentd.conf # for zabbix-agent to zabbix-agent2
 rm -rf /etc/zabbix/zabbix_agent*.conf.rpmnew 
 
+elif [ -x /usr/bin/dnf ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '7') ==  "8" ] ; then
+
+# systemctl stop zabbix-agent # for zabbix-agent to zabbix-agent2
+# dnf remove zabbix-agent -y # for zabbix-agent to zabbix-agent2
+
+dnf install epel-release -y
+rpm -Uvh https://repo.zabbix.com/zabbix/5.0/rhel/7/x86_64/zabbix-release-5.0-1.el7.noarch.rpm
+dnf clean all
+
+dnf upgrade zabbix-agent -y # for zabbix-agent v4.4 to v5.0
+# dnf install zabbix-agent2 -y # for zabbix-agent to zabbix-agent2
+# mv /etc/zabbix/zabbix_agentd.d/* /etc/zabbix/zabbix_agent2.d/ # for zabbix-agent to zabbix-agent2
+
+# Delete unnecessary files
+# rm -rf /etc/zabbix/zabbix_agentd /etc/zabbix/zabbix_agentd.conf # for zabbix-agent to zabbix-agent2
+rm -rf /etc/zabbix/zabbix_agent*.conf.rpmnew 
+
 fi
+
 # Only run it on (Ubuntu/Debian)
 
 if [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o xenial) == "Xenial" ] ; then
