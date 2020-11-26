@@ -57,48 +57,49 @@ fi
 
 # Only run it on (RHEL/CentOS)
 
-if [ -x /usr/bin/yum ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '7') ==  "7" ] ; then
+if [ -x /usr/bin/yum ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '7') == "7" ]] ; then
 
-# systemctl stop zabbix-agent # for zabbix-agent to zabbix-agent2
-# yum remove zabbix-agent -y # for zabbix-agent to zabbix-agent2
+# systemctl stop zabbix-agent # from zabbix-agent to zabbix-agent2
+# yum remove zabbix-agent -y # from zabbix-agent to zabbix-agent2
 
 yum install epel-release -y
-rpm -Uvh https://repo.zabbix.com/zabbix/5.0/rhel/7/x86_64/zabbix-release-5.0-1.el7.noarch.rpm
+rpm -Uvh https://repo.zabbix.com/zabbix/5.2/rhel/7/x86_64/zabbix-release-5.2-1.el7.noarch.rpm
 yum clean all
 
-yum upgrade zabbix-agent -y # for zabbix-agent v4.4 to v5.0
-# yum install zabbix-agent2 -y # for zabbix-agent to zabbix-agent2
-# mv /etc/zabbix/zabbix_agentd.d/* /etc/zabbix/zabbix_agent2.d/ # for zabbix-agent to zabbix-agent2
+yum upgrade zabbix-agent -y # from any version to v5.2
+# yum install zabbix-agent2 -y # from zabbix-agent to zabbix-agent2
+# mv /etc/zabbix/zabbix_agentd.d/* /etc/zabbix/zabbix_agent2.d/ # from zabbix-agent to zabbix-agent2
 
 # Delete unnecessary files
-# rm -rf /etc/zabbix/zabbix_agentd /etc/zabbix/zabbix_agentd.conf # for zabbix-agent to zabbix-agent2
+# rm -rf /etc/zabbix/zabbix_agentd /etc/zabbix/zabbix_agentd.conf # from zabbix-agent to zabbix-agent2
 rm -rf /etc/zabbix/zabbix_agent*.conf.rpmnew 
 
-elif [ -x /usr/bin/dnf ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '7') ==  "8" ] ; then
+elif [ -x /usr/bin/dnf ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '7') == "8" ]] ; then
 
-# systemctl stop zabbix-agent # for zabbix-agent to zabbix-agent2
-# dnf remove zabbix-agent -y # for zabbix-agent to zabbix-agent2
+# systemctl stop zabbix-agent # from zabbix-agent to zabbix-agent2
+# dnf remove zabbix-agent -y # from zabbix-agent to zabbix-agent2
 
 dnf install epel-release -y
-rpm -Uvh https://repo.zabbix.com/zabbix/5.0/rhel/8/x86_64/zabbix-release-5.0-1.el8.noarch.rpm
+rpm -Uvh  https://repo.zabbix.com/zabbix/5.2/rhel/8/x86_64/zabbix-release-5.2-1.el8.noarch.rpm
 dnf clean all
 
-dnf upgrade zabbix-agent -y # for zabbix-agent v4.4 to v5.0
-# dnf install zabbix-agent2 -y # for zabbix-agent to zabbix-agent2
-# mv /etc/zabbix/zabbix_agentd.d/* /etc/zabbix/zabbix_agent2.d/ # for zabbix-agent to zabbix-agent2
+dnf upgrade zabbix-agent -y # from any version to v5.2
+# dnf install zabbix-agent2 -y # from zabbix-agent to zabbix-agent2
+# mv /etc/zabbix/zabbix_agentd.d/* /etc/zabbix/zabbix_agent2.d/ # from zabbix-agent to zabbix-agent2
 
 # Delete unnecessary files
-# rm -rf /etc/zabbix/zabbix_agentd /etc/zabbix/zabbix_agentd.conf # for zabbix-agent to zabbix-agent2
+# rm -rf /etc/zabbix/zabbix_agentd /etc/zabbix/zabbix_agentd.conf # from zabbix-agent to zabbix-agent2
 rm -rf /etc/zabbix/zabbix_agent*.conf.rpmnew 
 
 fi
 
 # Only run it on (Ubuntu/Debian)
 
-if [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o xenial) == "Xenial" ] ; then
+if [ -x /usr/bin/apt-get ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o xenial) == "Xenial" ]] ; then
   
-  wget https://repo.zabbix.com/zabbix/5.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.0-1+xenial_all.deb 
-  dpkg -i zabbix-release_5.0-1+xenial_all.deb
+  wget https://repo.zabbix.com/zabbix/5.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.2-1+ubuntu16.04_all.deb 
+  dpkg -i zabbix-release_5.2-1+ubuntu16.04_all.deb
+
   apt-get update
   apt-get install --only-upgrade zabbix-agent -y
 
@@ -106,20 +107,40 @@ if [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| 
   rm -rf zabbix-release_* 
   rm -rf /etc/zabbix/zabbix_agent*.conf.dpkg-dist
 
-elif [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o bionic) == "Bionic" ]; then
+elif [ -x /usr/bin/apt-get ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o bionic) == "Bionic" ]] ; then
 
-  # systemctl stop zabbix-agent # for zabbix-agent to zabbix-agent2
-  # apt remove zabbix-agent # for zabbix-agent to zabbix-agent2
-  wget https://repo.zabbix.com/zabbix/5.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.0-1+bionic_all.deb
-  dpkg -i zabbix-release_5.0-1+bionic_all.deb
+  # systemctl stop zabbix-agent # from zabbix-agent to zabbix-agent2
+  # apt remove zabbix-agent # from zabbix-agent to zabbix-agent2
+
+  wget https://repo.zabbix.com/zabbix/5.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.2-1+ubuntu18.04_all.deb
+  dpkg -i zabbix-release_5.2-1+ubuntu18.04_all.deb
+
   apt-get update
-  apt upgrade zabbix-agent -y # for zabbix-agent v4.4 to v5.0
- # apt install zabbix-agent2 -y # for zabbix-agent to zabbix-agent2
- # mv /etc/zabbix/zabbix_agentd.d/* /etc/zabbix/zabbix_agent2.d/ # for zabbix-agent to zabbix-agent2
+  apt upgrade zabbix-agent -y # from any version to v5.2
+ # apt install zabbix-agent2 -y # from zabbix-agent to zabbix-agent2
+ # mv /etc/zabbix/zabbix_agentd.d/* /etc/zabbix/zabbix_agent2.d/ # from zabbix-agent to zabbix-agent2
 
   # Delete unnecessary files
   rm -rf zabbix-release_*
-  # rm -rf /etc/zabbix/zabbix_agentd /etc/zabbix/zabbix_agentd.conf # for zabbix-agent to zabbix-agent2
+  # rm -rf /etc/zabbix/zabbix_agentd /etc/zabbix/zabbix_agentd.conf # from zabbix-agent to zabbix-agent2
+  rm -rf /etc/zabbix/zabbix_agent*.conf.dpkg-dist
+
+elif elif [ -x /usr/bin/apt-get ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o focal) == "Focal" ]] ; then
+
+ # systemctl stop zabbix-agent # from zabbix-agent to zabbix-agent2
+ # apt remove zabbix-agent # from zabbix-agent to zabbix-agent2
+
+  wget https://repo.zabbix.com/zabbix/5.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.2-1+ubuntu20.04_all.deb
+  dpkg -i zabbix-release_5.2-1+ubuntu20.04_all.deb
+
+  apt-get update
+  apt upgrade zabbix-agent -y # from any version to v5.2
+ # apt install zabbix-agent2 -y # from zabbix-agent to zabbix-agent2
+ # mv /etc/zabbix/zabbix_agentd.d/* /etc/zabbix/zabbix_agent2.d/ # from zabbix-agent to zabbix-agent2
+
+  # Delete unnecessary files
+  rm -rf zabbix-release_*
+  # rm -rf /etc/zabbix/zabbix_agentd /etc/zabbix/zabbix_agentd.conf # from zabbix-agent to zabbix-agent2
   rm -rf /etc/zabbix/zabbix_agent*.conf.dpkg-dist
 fi
 
@@ -131,7 +152,7 @@ sed -i "s/^\(Hostname\).*/\1="$HOST_NAME"/" /etc/zabbix/zabbix_agent*.conf
 # Enable and start agent
 # ---------------------------------------------------\
 systemctl enable zabbix-agent && systemctl start zabbix-agent
-# systemctl enable zabbix-agent2 && systemctl start zabbix-agent2 # for zabbix-agent to zabbix-agent2
+# systemctl enable zabbix-agent2 && systemctl start zabbix-agent2 # for zabbix-agent2
 
 # PSK
 # TLSConnect=psk
@@ -169,7 +190,8 @@ if echo "$answer" | grep -iq "^y" ;then
 
     sed -i 's/DenyKey=.*/# DenyKey=system.run[*]/' /etc/zabbix/zabbix_agent*.conf
     sed -i 's/# Plugins.SystemRun.LogRemoteCommands=.*/Plugins.SystemRun.LogRemoteCommands=1/' /etc/zabbix/zabbix_agent*.conf
-    sed -i 's/# User=zabbix.*/User=zabbix/' /etc/zabbix/zabbix_agent*.conf
+    sed -i 's/# LogRemoteCommands=.*/LogRemoteCommands=1/' /etc/zabbix/zabbix_agent*.conf
+    sed -i 's/# User=zabbix.*/User=zabbix/' /etc/zabbix/zabbix_agent*.conf # not working with agent version 2
     sed -i 's/# Timeout=3.*/Timeout=30/' /etc/zabbix/zabbix_agent*.conf
 
 else
@@ -177,7 +199,7 @@ else
 fi
 
 systemctl restart zabbix-agent
-# systemctl restart zabbix-agent2 # for zabbix-agent to zabbix-agent2
+# systemctl restart zabbix-agent2 # for zabbix-agent2
 
 # Final
 # ---------------------------------------------------\
