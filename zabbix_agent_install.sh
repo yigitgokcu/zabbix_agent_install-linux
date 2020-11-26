@@ -228,7 +228,7 @@ if echo "$answer" | grep -iq "^y" ;then
     Info "PSKIdentity - $PSKIdentity$RAND_PREFIX"
 
 else
-      echo -e "Ok, your agent is will be insecure..."
+      echo -e "Ok, your agent will be insecure..."
 fi
 
 # Active agent (EnableRemoteCommands)
