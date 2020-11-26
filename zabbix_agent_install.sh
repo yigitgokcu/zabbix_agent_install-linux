@@ -59,64 +59,59 @@ fi
 # Installation
 # ---------------------------------------------------\
 
+# Download Prerequisite Packages & Zabbix Templates 
+
+if [ -x /usr/bin/yum ] ; then
+yum install epel-release grep gawk lsof jq fcgi git -y 
+elif [ -x /usr/bin/apt ] ; then apt install grep gawk lsof jq libfcgi0ldbl git -y
+fi
+
+git clone https://github.com/yigitgokcu/zabbix-templates.git /tmp/zabbix-templates
+
 # Only run it on (RHEL/CentOS)
 
-if [ -x /usr/bin/yum ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '7') ==  "7" ] ; then
+if [ -x /usr/bin/yum ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '7') == "7" ]] ; then
 
-yum install epel-release -y
-rpm -Uvh https://repo.zabbix.com/zabbix/5.0/rhel/7/x86_64/zabbix-release-5.0-1.el7.noarch.rpm
+rpm -Uvh https://repo.zabbix.com/zabbix/5.2/rhel/7/x86_64/zabbix-release-5.2-1.el7.noarch.rpm
 yum clean all
 
 yum install zabbix-agent -y
-# yum install zabbix-agent2 -y # for zabbix-agent to zabbix-agent2
-
-# For PHP-FPM Monitoring
-yum install unzip grep gawk lsof jq fcgi -y
+# for zabbix-agent to zabbix-agent2
+# yum install zabbix-agent2 -y 
 
   # For Pending Update Monitoring (RHEL/CentOS)
-  wget https://github.com/yigitgokcu/zabbix-template-check-updates-linux/archive/master.zip -O /tmp/zabbix-template-check-updates.zip
-  unzip -j /tmp/zabbix-template-check-updates.zip -d /tmp/zabbix-template-check-updates
-  cp /tmp/zabbix-template-check-updates/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
-  rm -rf /tmp/zabbix-template-check-updates*
+  cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
 
   # Add CronJob (RHEL/CentOS)
   (crontab -u root -l; echo "0 4 * * * yum check-update --quiet | grep '^[a-Z0-9]' | wc -l > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
 
-elif [ -x /usr/bin/dnf ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '8') ==  "8" ] ; then
+elif [ -x /usr/bin/dnf ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '8') == "8" ] ; then
 
-dnf install epel-release -y
-rpm -Uvh https://repo.zabbix.com/zabbix/5.0/rhel/8/x86_64/zabbix-release-5.0-1.el8.noarch.rpm
+rpm -Uvh  https://repo.zabbix.com/zabbix/5.2/rhel/8/x86_64/zabbix-release-5.2-1.el8.noarch.rpm
 dnf clean all
 
 dnf install zabbix-agent -y
-# yum install zabbix-agent2 -y # for zabbix-agent to zabbix-agent2
-
-# For PHP-FPM Monitoring
-dnf install unzip grep gawk lsof jq fcgi -y
+# for zabbix-agent to zabbix-agent2
+# dnf install zabbix-agent2 -y 
 
   # For Pending Update Monitoring (RHEL/CentOS)
-  wget https://github.com/yigitgokcu/zabbix-template-check-updates-linux/archive/master.zip -O /tmp/zabbix-template-check-updates.zip
-  unzip -j /tmp/zabbix-template-check-updates.zip -d /tmp/zabbix-template-check-updates
-  cp /tmp/zabbix-template-check-updates/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
-  rm -rf /tmp/zabbix-template-check-updates*
+  cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
 
   # Add CronJob (RHEL/CentOS)
   (crontab -u root -l; echo "0 4 * * * yum check-update --quiet | grep '^[a-Z0-9]' | wc -l > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root -
 
 fi
 
-# Only run it on (Ubuntu/Debian)
+# Only run it on (Ubuntu)
 
-if [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o xenial) ==  "Xenial" ] ; then
+if [ -x /usr/bin/apt-get ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o xenial) == "Xenial" ]] ; then
   
-  wget https://repo.zabbix.com/zabbix/5.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.0-1+xenial_all.deb 
-  dpkg -i zabbix-release_5.0-1+xenial_all.deb
+  wget https://repo.zabbix.com/zabbix/5.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.2-1+ubuntu16.04_all.deb 
+  dpkg -i zabbix-release_5.2-1+ubuntu16.04_all.deb
+  
   apt-get update
   apt install zabbix-agent -y
 
-  # For PHP-FPM Monitoring
-  apt-get -y install unzip grep gawk lsof jq libfcgi0ldbl
-  
   # Remove UFW and install Firewalld
   # apt remove ufw -y && apt purge ufw -y
   # apt install firewalld -y
@@ -124,26 +119,21 @@ if [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| 
   # Delete unnecessary files
   rm -rf zabbix-release_*
 
-  # For Pending Update Monitoring (Ubuntu/Debian)
-  wget https://github.com/yigitgokcu/zabbix-template-check-updates-linux/archive/master.zip -O /tmp/zabbix-template-check-updates.zip
-  unzip -j /tmp/zabbix-template-check-updates.zip -d /tmp/zabbix-template-check-updates
-  cp /tmp/zabbix-template-check-updates/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
-  rm -rf /tmp/zabbix-template-check-updates*
+  # For Pending Update Monitoring (Ubuntu)
+  cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
 
-  # Add CronJob (Ubuntu/Debian)
+  # Add CronJob (Ubuntu)
   (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d" " -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
 
-elif [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o bionic) ==  "Bionic" ]; then
+elif [ -x /usr/bin/apt-get ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o bionic) == "Bionic" ]] ; then
 
-  wget https://repo.zabbix.com/zabbix/5.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.0-1+bionic_all.deb
-  dpkg -i zabbix-release_5.0-1+bionic_all.deb
+  wget https://repo.zabbix.com/zabbix/5.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.2-1+ubuntu18.04_all.deb
+  dpkg -i zabbix-release_5.2-1+ubuntu18.04_all.deb
+
   apt-get update
-
   apt install zabbix-agent -y
-  # apt install zabbix-agent2 -y # for zabbix-agent to zabbix-agent2
-
-  # For PHP-FPM Monitoring
-  apt-get -y install grep gawk lsof jq libfcgi0ldbl
+  # for zabbix-agent to zabbix-agent2
+  # apt install zabbix-agent2 -y 
   
   # Remove UFW and install Firewalld
   # apt remove ufw -y && apt purge ufw -y
@@ -152,11 +142,31 @@ elif [ -x /usr/bin/apt-get ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $3}'
   # Delete unnecessary files
   rm -rf zabbix-release_*
 
-  # For Pending Update Monitoring (Ubuntu/Debian)
-  wget https://github.com/yigitgokcu/zabbix-template-check-updates-linux/archive/master.zip -O /tmp/zabbix-template-check-updates.zip
-  unzip -j /tmp/zabbix-template-check-updates.zip -d /tmp/zabbix-template-check-updates
-  cp /tmp/zabbix-template-check-updates/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
-  rm -rf /tmp/zabbix-template-check-updates*
+  # For Pending Update Monitoring (Ubuntu)
+  cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+
+  # Add CronJob (Ubuntu/Debian)
+  (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d " " -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
+
+elif [ -x /usr/bin/apt-get ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o focal) == "Focal" ]] ; then
+
+  wget https://repo.zabbix.com/zabbix/5.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.2-1+ubuntu20.04_all.deb
+  dpkg -i zabbix-release_5.2-1+ubuntu20.04_all.deb
+
+  apt-get update
+  apt install zabbix-agent -y
+  # for zabbix-agent to zabbix-agent2
+  # apt install zabbix-agent2 -y 
+  
+  # Remove UFW and install Firewalld
+  # apt remove ufw -y && apt purge ufw -y
+  # apt install firewalld -y
+  
+  # Delete unnecessary files
+  rm -rf zabbix-release_*
+
+  # For Pending Update Monitoring (Ubuntu)
+  cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
 
   # Add CronJob (Ubuntu/Debian)
   (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d " " -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
@@ -218,7 +228,7 @@ if echo "$answer" | grep -iq "^y" ;then
     Info "PSKIdentity - $PSKIdentity$RAND_PREFIX"
 
 else
-      echo -e "Ok, you agent is will be insecure..."
+      echo -e "Ok, your agent is will be insecure..."
 fi
 
 # Active agent (EnableRemoteCommands)
@@ -250,11 +260,8 @@ if echo "$answer" | grep -iq "^y" ;then
 
     chown -R zabbix:zabbix /var/lib/zabbix/.my.cnf
     
-    wget https://github.com/yigitgokcu/zabbix-template-mysql-galera_cluster-linux/archive/master.zip -O /tmp/zabbix-mysql.zip
-    unzip -j /tmp/zabbix-mysql.zip -d /tmp/zabbix-mysql
-    cp /tmp/zabbix-mysql/userparameter_mysql.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
-    rm -rf /tmp/zabbix-mysql*
-    
+    cp /tmp/zabbix-templates/zabbix-template-mysql-galera_cluster-linux/userparameter_mysql.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+        
     mysql -e "CREATE USER 'zabbix'@'localhost' IDENTIFIED BY '$PASS';"
     mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'zabbix'@'localhost';"
     mysql -e "FLUSH PRIVILEGES;"
@@ -271,10 +278,7 @@ read answer
 if echo "$answer" | grep -iq "^y" ;then
     echo "Creating necessary files..."
 
-    wget https://github.com/yigitgokcu/zabbix-template-nginx-linux/archive/master.zip -O /tmp/zabbix-nginx.zip
-    unzip -j /tmp/zabbix-nginx.zip -d /tmp/zabbix-nginx
-    cp /tmp/zabbix-nginx/statistics.conf /etc/nginx/conf.d/ && service nginx restart
-    rm -rf /tmp/zabbix-nginx*
+    cp /tmp/zabbix-templates/zabbix-template-nginx-linux/zabbix-nginx/statistics.conf /etc/nginx/conf.d/ && service nginx restart
      
     echo "Done."
 
@@ -289,14 +293,11 @@ read answer
 if echo "$answer" | grep -iq "^y" ;then
     echo "Creating necessary files..."
 
-    wget https://github.com/yigitgokcu/zabbix-template-phpfpm-linux/archive/master.zip -O /tmp/zabbix-php-fpm.zip
-    unzip -j /tmp/zabbix-php-fpm.zip -d /tmp/zabbix-php-fpm
-    cp /tmp/zabbix-php-fpm/userparameter_php_fpm.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
-    cp /tmp/zabbix-php-fpm/zabbix_php_fpm_*.sh /var/lib/zabbix/scripts/
-    cp /tmp/zabbix-php-fpm/statistics.conf /etc/nginx/conf.d/ && service nginx restart
+    cp /tmp/zabbix-templates/zabbix-template-phpfpm-linux/userparameter_php_fpm.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+    cp /tmp/zabbix-templates/zabbix-template-phpfpm-linux/zabbix_php_fpm_*.sh /var/lib/zabbix/scripts/
+    cp /tmp/zabbix-templates/zabbix-template-phpfpm-linux/statistics.conf /etc/nginx/conf.d/ && service nginx reload
     chown -R zabbix:zabbix /var/lib/zabbix/scripts/zabbix_php_fpm_*.sh
-    chmod +x /var/lib/zabbix/scripts/zabbix_php_fpm_*.sh
-    rm -rf /tmp/zabbix-php-fpm*
+    chmod a+x /var/lib/zabbix/scripts/zabbix_php_fpm_*.sh
     
     #Grant privileges to the PHP-FPM auto discovery script only
     echo 'zabbix ALL = NOPASSWD: /var/lib/zabbix/scripts/zabbix_php_fpm_discovery.sh' >> /etc/sudoers
@@ -315,18 +316,15 @@ read answer
 if echo "$answer" | grep -iq "^y" ;then
     echo "Creating necessary files..."
 
-wget https://github.com/yigitgokcu/zabbix-template-cpanel-linux/archive/master.zip -O /tmp/zabbix-template-cpanel-linux.zip
-unzip -j /tmp/zabbix-template-cpanel-linux.zip -d /tmp/zabbix-template-cpanel-linux
-cp /tmp/zabbix-template-cpanel-linux/userparameter_cpanel.conf  $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
-cp /tmp/zabbix-template-cpanel-linux/zabbix_exim-* /var/lib/zabbix/scripts/
-rm -rf /tmp/zabbix-template-cpanel-linux*
-chown -R zabbix:zabbix /var/lib/zabbix/scripts/zabbix_exim-*
-chmod a+x /var/lib/zabbix/scripts/zabbix_exim-*
+    cp /tmp/zabbix-templates/zabbix-template-cpanel-linux/userparameter_cpanel.conf  $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+    cp /tmp/zabbix-templates/zabbix-template-cpanel-linux/zabbix_exim-* /var/lib/zabbix/scripts/
+    chown -R zabbix:zabbix /var/lib/zabbix/scripts/zabbix_exim-*
+    chmod a+x /var/lib/zabbix/scripts/zabbix_exim-*
 
-echo 'zabbix ALL=(ALL) NOPASSWD: /usr/sbin/exim -bp' >> /etc/sudoers
-echo 'zabbix ALL=(ALL) NOPASSWD: /usr/sbin/whmapi1' >> /etc/sudoers
-echo 'zabbix ALL=(ALL) NOPASSWD: /var/lib/zabbix/scripts/zabbix_exim-delete-frozen.sh' >> /etc/sudoers
-echo 'zabbix ALL=(ALL) NOPASSWD: /var/lib/zabbix/scripts/zabbix_exim-find-spammer.py' >> /etc/sudoers
+    echo 'zabbix ALL=(ALL) NOPASSWD: /usr/sbin/exim -bp' >> /etc/sudoers
+    echo 'zabbix ALL=(ALL) NOPASSWD: /usr/sbin/whmapi1' >> /etc/sudoers
+    echo 'zabbix ALL=(ALL) NOPASSWD: /var/lib/zabbix/scripts/zabbix_exim-delete-frozen.sh' >> /etc/sudoers
+    echo 'zabbix ALL=(ALL) NOPASSWD: /var/lib/zabbix/scripts/zabbix_exim-find-spammer.py' >> /etc/sudoers
 
     echo "Done."
 
@@ -341,13 +339,10 @@ read answer
 if echo "$answer" | grep -iq "^y" ;then
     echo "Creating necessary files..."
 
-wget https://github.com/yigitgokcu/zabbix-template-disk-perfomance-linux/archive/master.zip -O /tmp/zabbix-disk-performance.zip
-unzip -j /tmp/zabbix-disk-performance -d /tmp/zabbix-disk-performance
-cp /tmp/zabbix-disk-performance/userparameter_check_disk_stat.conf  $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
-cp /tmp/zabbix-disk-performance/zabbix_check_disk_stat.py /var/lib/zabbix/scripts/
-rm -rf /tmp/zabbix-disk-performance*
-chown -R zabbix:zabbix /var/lib/zabbix/scripts/zabbix_check_disk_stat.py
-chmod a+x /var/lib/zabbix/scripts/zabbix_check_disk_stat.py
+    cp /tmp/zabbix-templates/zabbix-template-disk-perfomance-linux/userparameter_check_disk_stat.conf  $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+    cp /tmp/zabbix-templates/zabbix-template-disk-perfomance-linux/zabbix_check_disk_stat.py /var/lib/zabbix/scripts/
+    chown -R zabbix:zabbix /var/lib/zabbix/scripts/zabbix_check_disk_stat.py
+    chmod a+x /var/lib/zabbix/scripts/zabbix_check_disk_stat.py
 
     echo "Done."
 
@@ -362,20 +357,17 @@ read answer
 if echo "$answer" | grep -iq "^y" ;then
     echo "Creating necessary files..."
 
-wget https://github.com/yigitgokcu/zabbix-template-postfix-linux/archive/master.zip -O /tmp/zabbix-postfix.zip
-unzip -j /tmp/zabbix-postfix.zip -d /tmp/zabbix-postfix
-cp /tmp/zabbix-postfix/userparamater_postfix.conf  $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
-cp /tmp/zabbix-postfix/pygtail.py /var/lib/zabbix/scripts/
-cp /tmp/zabbix-postfix/zabbix-postfix-stats.sh /var/lib/zabbix/scripts/
-rm -rf /tmp/zabbix-postfix*
-chown -R zabbix:zabbix /var/lib/zabbix/scripts/zabbix-postfix-stats.sh
-chmod a+x /var/lib/zabbix/scripts/zabbix-postfix-stats.sh
-chown -R zabbix:zabbix /var/lib/zabbix/scripts/pygtail.py 
-chmod a+x /var/lib/zabbix/scripts/pygtail.py
+    cp /tmp/zabbix-templates/zabbix-template-postfix-linux/userparamater_postfix.conf  $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+    cp /tmp/zabbix-templates/zabbix-template-postfix-linux/pygtail.py /var/lib/zabbix/scripts/
+    cp /tmp/zabbix-templates/zabbix-template-postfix-linux/zabbix-postfix-stats.sh /var/lib/zabbix/scripts/
+    chown -R zabbix:zabbix /var/lib/zabbix/scripts/zabbix-postfix-stats.sh
+    chmod a+x /var/lib/zabbix/scripts/zabbix-postfix-stats.sh
+    chown -R zabbix:zabbix /var/lib/zabbix/scripts/pygtail.py 
+    chmod a+x /var/lib/zabbix/scripts/pygtail.py
 
 
 # Grant privileges to the script only
-echo 'zabbix  ALL=(ALL) NOPASSWD: /var/lib/zabbix/scripts/zabbix-postfix-stats.sh' >> /etc/sudoers  
+    echo 'zabbix  ALL=(ALL) NOPASSWD: /var/lib/zabbix/scripts/zabbix-postfix-stats.sh' >> /etc/sudoers  
 
 
     echo "Done."
@@ -388,8 +380,12 @@ fi
 # We can add more choice for service monitoring in here.
 # ---------------------------------------------------\
 
+# Delete unnecessary files 
+rm -rf /tmp/zabbix-templates
+
 systemctl restart zabbix-agent
-# systemctl restart zabbix-agent2 # for agent version 2
+# for agent version 2
+# systemctl restart zabbix-agent2 
 
 # Final
 # ---------------------------------------------------\
