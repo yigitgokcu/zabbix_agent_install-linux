@@ -125,7 +125,7 @@ elif [ -x /usr/bin/apt-get ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}
   # rm -rf /etc/zabbix/zabbix_agentd /etc/zabbix/zabbix_agentd.conf # from zabbix-agent to zabbix-agent2
   rm -rf /etc/zabbix/zabbix_agent*.conf.dpkg-dist
 
-elif elif [ -x /usr/bin/apt-get ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o focal) == "Focal" ]] ; then
+elif [ -x /usr/bin/apt-get ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o focal) == "Focal" ]] ; then
 
  # systemctl stop zabbix-agent # from zabbix-agent to zabbix-agent2
  # apt remove zabbix-agent # from zabbix-agent to zabbix-agent2
