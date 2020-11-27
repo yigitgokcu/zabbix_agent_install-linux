@@ -231,11 +231,11 @@ else
       echo -e "Ok, your agent will be insecure..."
 fi
 
-# Active agent (EnableRemoteCommands)
-echo -en "Do you want to enable active agent feature? (y/n)? "
+# EnableRemoteCommands
+echo -en "Do you want to enable remote commands feature? (y/n)? "
 read answer
 if echo "$answer" | grep -iq "^y" ;then
-    echo "Enabling active agent..."
+    echo "Enabling remote commands..."
 
     sed -i 's/DenyKey=.*/# DenyKey=system.run[*]/' /etc/zabbix/zabbix_agent*.conf
     sed -i 's/# Plugins.SystemRun.LogRemoteCommands=.*/Plugins.SystemRun.LogRemoteCommands=1/' /etc/zabbix/zabbix_agent*.conf
