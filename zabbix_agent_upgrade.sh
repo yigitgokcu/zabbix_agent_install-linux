@@ -98,8 +98,6 @@ if [ -x /usr/bin/apt-get ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'|
   wget https://repo.zabbix.com/zabbix/5.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.2-1+ubuntu16.04_all.deb 
   dpkg -i zabbix-release_5.2-1+ubuntu16.04_all.deb
 
-# Backup current zabbix_agentd.conf
-mv $(find /etc/zabbix/ -name zabbix_agentd*.conf -type f | head -n1) zabbix_agentd.conf.dpkg-dist
 
   apt-get update
   apt-get install --only-upgrade zabbix-agent -y
@@ -109,9 +107,6 @@ mv $(find /etc/zabbix/ -name zabbix_agentd*.conf -type f | head -n1) zabbix_agen
 
 elif [ -x /usr/bin/apt-get ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o bionic) == "Bionic" ]] ; then
 
-# Backup current zabbix_agentd.conf
-mv $(find /etc/zabbix/ -name zabbix_agentd*.conf -type f | head -n1) zabbix_agentd.conf.dpkg-dist
-  
   # systemctl stop zabbix-agent # from zabbix-agent to zabbix-agent2
   # apt remove zabbix-agent # from zabbix-agent to zabbix-agent2
 
@@ -127,8 +122,6 @@ mv $(find /etc/zabbix/ -name zabbix_agentd*.conf -type f | head -n1) zabbix_agen
   rm -rf zabbix-release_*
 
 elif [ -x /usr/bin/apt-get ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o focal) == "Focal" ]] ; then
-# Backup current zabbix_agentd.conf
-mv $(find /etc/zabbix/ -name zabbix_agentd*.conf -type f | head -n1) zabbix_agentd.conf.dpkg-dist
  
  # systemctl stop zabbix-agent # from zabbix-agent to zabbix-agent2
  # apt remove zabbix-agent # from zabbix-agent to zabbix-agent2
