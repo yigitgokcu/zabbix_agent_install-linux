@@ -60,7 +60,7 @@ fi
 if [ -x /usr/bin/yum ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '7') == "7" ]] ; then
 
 # Backup current zabbix_agentd.conf
-mv $(find /etc/zabbix/ -name zabbix_agentd*.conf -type f | head -n1) zabbix_agentd.conf.rpmsave
+mv $(find /etc/zabbix/ -name zabbix_agentd*.conf -type f | head -n1) /etc/zabbix/zabbix_agentd.conf.rpmsave
 
 # systemctl stop zabbix-agent # from zabbix-agent to zabbix-agent2
 # yum remove zabbix-agent -y # from zabbix-agent to zabbix-agent2
@@ -76,7 +76,7 @@ yum upgrade zabbix-agent -y # from any version to v5.2
 elif [ -x /usr/bin/dnf ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '7') == "8" ]] ; then
 
 # Backup current zabbix_agentd.conf
-mv $(find /etc/zabbix/ -name zabbix_agentd*.conf -type f | head -n1) zabbix_agentd.conf.rpmsave
+mv $(find /etc/zabbix/ -name zabbix_agentd*.conf -type f | head -n1) /etc/zabbix/zabbix_agentd.conf.rpmsave
 
 # systemctl stop zabbix-agent # from zabbix-agent to zabbix-agent2
 # dnf remove zabbix-agent -y # from zabbix-agent to zabbix-agent2
