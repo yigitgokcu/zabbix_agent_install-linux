@@ -201,7 +201,7 @@ if echo "$answer" | grep -iq "^y" ;then
     echo "Deleting..."
     # rm -rf /etc/zabbix/zabbix_agentd /etc/zabbix/zabbix_agentd.conf # from zabbix-agent to zabbix-agent2
     rm -rf /etc/zabbix/zabbix_agent*.conf.rpmnew 
-    rm -rf /etc/zabbix/zabbix_agent*.conf.dpkg-dist
+    rm -rf /etc/zabbix/zabbix_agent*.conf.dpkg-dist-*
 else
       echo -e "Nothing to do."
 fi
