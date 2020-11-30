@@ -59,6 +59,9 @@ fi
 
 if [ -x /usr/bin/yum ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '7') == "7" ]] ; then
 
+# Backup current zabbix_agentd.conf
+mv $(find /etc/zabbix/ -name zabbix_agentd*.conf -type f | head -n1) zabbix_agentd.conf.rpmsave
+
 # systemctl stop zabbix-agent # from zabbix-agent to zabbix-agent2
 # yum remove zabbix-agent -y # from zabbix-agent to zabbix-agent2
 
@@ -70,11 +73,10 @@ yum upgrade zabbix-agent -y # from any version to v5.2
 # yum install zabbix-agent2 -y # from zabbix-agent to zabbix-agent2
 # mv /etc/zabbix/zabbix_agentd.d/* /etc/zabbix/zabbix_agent2.d/ # from zabbix-agent to zabbix-agent2
 
-# Delete unnecessary files
-# rm -rf /etc/zabbix/zabbix_agentd /etc/zabbix/zabbix_agentd.conf # from zabbix-agent to zabbix-agent2
-rm -rf /etc/zabbix/zabbix_agent*.conf.rpmnew 
-
 elif [ -x /usr/bin/dnf ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '7') == "8" ]] ; then
+
+# Backup current zabbix_agentd.conf
+mv $(find /etc/zabbix/ -name zabbix_agentd*.conf -type f | head -n1) zabbix_agentd.conf.rpmsave
 
 # systemctl stop zabbix-agent # from zabbix-agent to zabbix-agent2
 # dnf remove zabbix-agent -y # from zabbix-agent to zabbix-agent2
@@ -87,10 +89,6 @@ dnf upgrade zabbix-agent -y # from any version to v5.2
 # dnf install zabbix-agent2 -y # from zabbix-agent to zabbix-agent2
 # mv /etc/zabbix/zabbix_agentd.d/* /etc/zabbix/zabbix_agent2.d/ # from zabbix-agent to zabbix-agent2
 
-# Delete unnecessary files
-# rm -rf /etc/zabbix/zabbix_agentd /etc/zabbix/zabbix_agentd.conf # from zabbix-agent to zabbix-agent2
-rm -rf /etc/zabbix/zabbix_agent*.conf.rpmnew 
-
 fi
 
 # Only run it on (Ubuntu)
@@ -100,15 +98,20 @@ if [ -x /usr/bin/apt-get ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'|
   wget https://repo.zabbix.com/zabbix/5.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.2-1+ubuntu16.04_all.deb 
   dpkg -i zabbix-release_5.2-1+ubuntu16.04_all.deb
 
+# Backup current zabbix_agentd.conf
+mv $(find /etc/zabbix/ -name zabbix_agentd*.conf -type f | head -n1) zabbix_agentd.conf.dpkg-dist
+
   apt-get update
   apt-get install --only-upgrade zabbix-agent -y
 
   # Delete unnecessary files
   rm -rf zabbix-release_* 
-  rm -rf /etc/zabbix/zabbix_agent*.conf.dpkg-dist
 
 elif [ -x /usr/bin/apt-get ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o bionic) == "Bionic" ]] ; then
 
+# Backup current zabbix_agentd.conf
+mv $(find /etc/zabbix/ -name zabbix_agentd*.conf -type f | head -n1) zabbix_agentd.conf.dpkg-dist
+  
   # systemctl stop zabbix-agent # from zabbix-agent to zabbix-agent2
   # apt remove zabbix-agent # from zabbix-agent to zabbix-agent2
 
@@ -122,11 +125,11 @@ elif [ -x /usr/bin/apt-get ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}
 
   # Delete unnecessary files
   rm -rf zabbix-release_*
-  # rm -rf /etc/zabbix/zabbix_agentd /etc/zabbix/zabbix_agentd.conf # from zabbix-agent to zabbix-agent2
-  rm -rf /etc/zabbix/zabbix_agent*.conf.dpkg-dist
 
 elif [ -x /usr/bin/apt-get ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o focal) == "Focal" ]] ; then
-
+# Backup current zabbix_agentd.conf
+mv $(find /etc/zabbix/ -name zabbix_agentd*.conf -type f | head -n1) zabbix_agentd.conf.dpkg-dist
+ 
  # systemctl stop zabbix-agent # from zabbix-agent to zabbix-agent2
  # apt remove zabbix-agent # from zabbix-agent to zabbix-agent2
 
@@ -140,8 +143,6 @@ elif [ -x /usr/bin/apt-get ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}
 
   # Delete unnecessary files
   rm -rf zabbix-release_*
-  # rm -rf /etc/zabbix/zabbix_agentd /etc/zabbix/zabbix_agentd.conf # from zabbix-agent to zabbix-agent2
-  rm -rf /etc/zabbix/zabbix_agent*.conf.dpkg-dist
 fi
 
 # Configure local zabbix agent
@@ -193,13 +194,24 @@ if echo "$answer" | grep -iq "^y" ;then
     sed -i 's/# LogRemoteCommands=.*/LogRemoteCommands=1/' /etc/zabbix/zabbix_agent*.conf
     sed -i 's/# User=zabbix.*/User=zabbix/' /etc/zabbix/zabbix_agent*.conf # not working with agent version 2
     sed -i 's/# Timeout=3.*/Timeout=30/' /etc/zabbix/zabbix_agent*.conf
-
 else
       echo -e "Nothing to do."
 fi
 
 systemctl restart zabbix-agent
 # systemctl restart zabbix-agent2 # for zabbix-agent2
+
+# Delete backup files
+echo -en "Do you want to delete zabbix_agentd.conf backup files (y/n)? "
+read answer
+if echo "$answer" | grep -iq "^y" ;then
+    echo "Deleting..."
+    # rm -rf /etc/zabbix/zabbix_agentd /etc/zabbix/zabbix_agentd.conf # from zabbix-agent to zabbix-agent2
+    rm -rf /etc/zabbix/zabbix_agent*.conf.rpmnew 
+    rm -rf /etc/zabbix/zabbix_agent*.conf.dpkg-dist
+else
+      echo -e "Nothing to do."
+fi
 
 # Final
 # ---------------------------------------------------\
@@ -210,6 +222,3 @@ Info "Zabbix Agent Status: $(systemctl status zabbix-agent | awk 'NR==3')"
 Info "Now, you must add this host to your Zabbix server in the Configuration > Hosts area"
 Info "This server IP - $HOST_IP"
 Info "This server name - $HOST_NAME"
-
-# Self Destruct
-rm $0
