@@ -2,6 +2,7 @@
 
 # Envs
 # ---------------------------------------------------\
+
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 SCRIPT_PATH=$(cd `dirname "${BASH_SOURCE[0]}"` && pwd)
 
@@ -18,17 +19,17 @@ Error()
 
 isRoot() {
 	if [ $(id -u) -ne 0 ]; then
-		Error "You must be root user to continue"
-		exit 1
-	fi
+	Error "You must be root user to continue"
+	exit 1
+fi
 	RID=$(id -u root 2>/dev/null)
 	if [ $? -ne 0 ]; then
-		Error "User root no found. You should create it to continue"
-		exit 1
-	fi
+	Error "User root no found. You should create it to continue"
+	exit 1
+fi
 	if [ $RID -ne 0 ]; then
-		Error "User root UID not equals 0. User root must have UID 0"
-		exit 1
+	Error "User root UID not equals 0. User root must have UID 0"
+	exit 1
 	fi
 }
 
@@ -36,12 +37,14 @@ isRoot
 
 # Vars
 # ---------------------------------------------------\
+
 SERVER_IP=$1
 HOST_NAME=$(hostname)
 HOST_IP=$(hostname -I | cut -d' ' -f1)
 PASS="$(openssl rand -base64 12)"
 
 # Secure agent
+
 PSKIdentity=${HOST_NAME%.*.*}
 TLSType="psk"
 RAND_PREFIX="-$TLSType-prefix-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)"
@@ -62,146 +65,197 @@ fi
 # Download Prerequisite Packages & Zabbix Templates 
 
 if [ -x /usr/bin/yum ] ; then
-yum install epel-release grep gawk lsof jq fcgi git -y 
-elif [ -x /usr/bin/apt ] ; then apt install grep gawk lsof jq libfcgi0ldbl git -y
+
+    yum install epel-release grep gawk lsof jq fcgi git -y
+
+elif  [ -x /usr/bin/apt ] ; then 
+
+    apt install grep gawk lsof jq libfcgi0ldbl git -y
+
+    # Remove UFW and install Firewalld
+#   apt remove ufw -y && apt purge ufw -y
+#   apt install firewalld -y
 fi
 
-git clone https://github.com/yigitgokcu/zabbix-templates.git /tmp/zabbix-templates
+    git clone https://github.com/yigitgokcu/zabbix-templates.git /tmp/zabbix-templates
 
 # Only run it on (RHEL/CentOS)
 
-if [ -x /usr/bin/yum ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '7') == "7" ]] ; then
+if [ -x /usr/bin/yum ] && [[ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '7') == "7" ]] ; then
 
-rpm -Uvh https://repo.zabbix.com/zabbix/5.2/rhel/7/x86_64/zabbix-release-5.2-1.el7.noarch.rpm
-yum clean all
+    rpm -Uvh https://repo.zabbix.com/zabbix/5.2/rhel/7/x86_64/zabbix-release-5.2-1.el7.noarch.rpm
+    yum clean all
 
-yum install zabbix-agent -y
-# for zabbix-agent to zabbix-agent2
-# yum install zabbix-agent2 -y 
+    yum install zabbix-agent -y
+#   yum install zabbix-agent2 -y # for zabbix-agent to zabbix-agent2  
 
-  # For Pending Update Monitoring (RHEL/CentOS)
-  cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+    # For Pending Update Monitoring (RHEL/CentOS)
+    cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
 
-  # Add CronJob (RHEL/CentOS)
-  (crontab -u root -l; echo "0 4 * * * yum check-update --quiet | grep '^[a-Z0-9]' | wc -l > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
+    # Add CronJob (RHEL/CentOS)
+    (crontab -u root -l; echo "0 4 * * * yum check-update --quiet | grep '^[a-Z0-9]' | wc -l > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
 
-elif [ -x /usr/bin/dnf ] & [ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '8') == "8" ] ; then
 
-rpm -Uvh  https://repo.zabbix.com/zabbix/5.2/rhel/8/x86_64/zabbix-release-5.2-1.el8.noarch.rpm
-dnf clean all
+elif [ -x /usr/bin/dnf ] && [[ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '8') == "8" ]] ; then
 
-dnf install zabbix-agent -y
-# for zabbix-agent to zabbix-agent2
-# dnf install zabbix-agent2 -y 
+    rpm -Uvh https://repo.zabbix.com/zabbix/5.2/rhel/8/x86_64/zabbix-release-5.2-1.el8.noarch.rpm
+    dnf clean all
 
-  # For Pending Update Monitoring (RHEL/CentOS)
-  cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+    dnf install zabbix-agent -y
+    dnf install zabbix-agent2 -y  # for zabbix-agent to zabbix-agent2
 
-  # Add CronJob (RHEL/CentOS)
-  (crontab -u root -l; echo "0 4 * * * yum check-update --quiet | grep '^[a-Z0-9]' | wc -l > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root -
+    # For Pending Update Monitoring (RHEL/CentOS)
+    cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+
+    # Add CronJob (RHEL/CentOS)
+    (crontab -u root -l; echo "0 4 * * * yum check-update --quiet | grep '^[a-Z0-9]' | wc -l > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root -
 
 fi
 
 # Only run it on (Ubuntu)
 
-if [ -x /usr/bin/apt-get ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o xenial) == "Xenial" ]] ; then
+if [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o xenial) == "Xenial" ]] ; then
   
-  wget https://repo.zabbix.com/zabbix/5.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.2-1+ubuntu16.04_all.deb 
-  dpkg -i zabbix-release_5.2-1+ubuntu16.04_all.deb
+    wget https://repo.zabbix.com/zabbix/5.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.2-1+ubuntu16.04_all.deb 
+    dpkg -i zabbix-release_5.2-1+ubuntu16.04_all.deb
   
-  apt-get update
-  apt install zabbix-agent -y
-
-  # Remove UFW and install Firewalld
-  # apt remove ufw -y && apt purge ufw -y
-  # apt install firewalld -y
+    apt-get update
+    apt install zabbix-agent -y
   
-  # Delete unnecessary files
-  rm -rf zabbix-release_*
+    # Delete unnecessary files
+    rm -rf zabbix-release_*
 
   # For Pending Update Monitoring (Ubuntu)
-  cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+    cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
 
   # Add CronJob (Ubuntu)
-  (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d" " -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
+    (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d" " -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
 
-elif [ -x /usr/bin/apt-get ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o bionic) == "Bionic" ]] ; then
+elif [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o bionic) == "Bionic" ]] ; then
 
-  wget https://repo.zabbix.com/zabbix/5.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.2-1+ubuntu18.04_all.deb
-  dpkg -i zabbix-release_5.2-1+ubuntu18.04_all.deb
+    wget https://repo.zabbix.com/zabbix/5.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.2-1+ubuntu18.04_all.deb
+    dpkg -i zabbix-release_5.2-1+ubuntu18.04_all.deb
 
-  apt-get update
-  apt install zabbix-agent -y
-  # for zabbix-agent to zabbix-agent2
-  # apt install zabbix-agent2 -y 
+    apt-get update
+    apt install zabbix-agent -y
+#   for zabbix-agent to zabbix-agent2 # apt install zabbix-agent2 -y 
   
-  # Remove UFW and install Firewalld
-  # apt remove ufw -y && apt purge ufw -y
-  # apt install firewalld -y
+    # Delete unnecessary files
+    rm -rf zabbix-release_*
+
+    # For Pending Update Monitoring (Ubuntu)
+    cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+
+    # Add CronJob (Ubuntu)
+    (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d " " -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
+
+elif [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o focal) == "Focal" ]] ; then
+
+    wget https://repo.zabbix.com/zabbix/5.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.2-1+ubuntu20.04_all.deb
+    dpkg -i zabbix-release_5.2-1+ubuntu20.04_all.deb
+
+    apt-get update
+    apt install zabbix-agent -y
+#   apt install zabbix-agent2 -y # for zabbix-agent to zabbix-agent2
   
-  # Delete unnecessary files
-  rm -rf zabbix-release_*
+#   Delete unnecessary files
+    rm -rf zabbix-release_*
 
-  # For Pending Update Monitoring (Ubuntu)
-  cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+#   For Pending Update Monitoring (Ubuntu)
+    cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
 
-  # Add CronJob (Ubuntu/Debian)
-  (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d " " -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
+#   Add CronJob (Ubuntu)
+    (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d " " -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
+fi
 
-elif [ -x /usr/bin/apt-get ] & [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o focal) == "Focal" ]] ; then
+# Only run it on (Debian)
 
-  wget https://repo.zabbix.com/zabbix/5.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.2-1+ubuntu20.04_all.deb
-  dpkg -i zabbix-release_5.2-1+ubuntu20.04_all.deb
-
-  apt-get update
-  apt install zabbix-agent -y
-  # for zabbix-agent to zabbix-agent2
-  # apt install zabbix-agent2 -y 
+if [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==1 {print $4}'| grep -i -o buster) == "Buster" ]] ; then
   
-  # Remove UFW and install Firewalld
-  # apt remove ufw -y && apt purge ufw -y
-  # apt install firewalld -y
+    wget https://repo.zabbix.com/zabbix/5.2/debian/pool/main/z/zabbix-release/zabbix-release_5.2-1+debian10_all.deb
+    dpkg -i zabbix-release_5.2-1+debian10_all.deb
+   
+    apt-get update
+    apt install zabbix-agent -y
   
-  # Delete unnecessary files
-  rm -rf zabbix-release_*
+    # Delete unnecessary files
+    rm -rf zabbix-release_*
 
-  # For Pending Update Monitoring (Ubuntu)
-  cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+  # For Pending Update Monitoring (Debian)
+    cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
 
-  # Add CronJob (Ubuntu/Debian)
-  (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d " " -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
+  # Add CronJob (Debian)
+    (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d" " -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
+
+elif [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==1 {print $4}'| grep -i -o stretch) == "Stretch" ]] ; then
+
+    wget https://repo.zabbix.com/zabbix/5.2/debian/pool/main/z/zabbix-release/zabbix-release_5.2-1+debian9_all.deb
+    dpkg -i zabbix-release_5.2-1+debian9_all.deb
+
+    apt-get update
+    apt install zabbix-agent -y
+#   for zabbix-agent to zabbix-agent2 # apt install zabbix-agent2 -y 
+  
+    # Delete unnecessary files
+    rm -rf zabbix-release_*
+
+    # For Pending Update Monitoring (Debian)
+    cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+
+    # Add CronJob (Debian)
+    (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d " " -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
+
+elif [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==1 {print $4}'| grep -i -o jessie) == "Jessie" ]] ; then
+
+    wget https://repo.zabbix.com/zabbix/5.2/debian/pool/main/z/zabbix-release/zabbix-release_5.2-1+debian8_all.deb
+    dpkg -i zabbix-release_5.2-1+debian8_all.deb
+
+    apt-get update
+    apt install zabbix-agent -y
+  
+#   Delete unnecessary files
+    rm -rf zabbix-release_*
+
+#   For Pending Update Monitoring (Debian)
+    cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
+
+#   Add CronJob (Debian)
+    (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d " " -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
 fi
 
 # Configure local zabbix agent
-sed -i "s/^\(Server=\).*/\1"$SERVER_IP"/" /etc/zabbix/zabbix_agent*.conf
-sed -i "s/^\(ServerActive\).*/\1="$SERVER_IP"/" /etc/zabbix/zabbix_agent*.conf
-sed -i "s/^\(Hostname\).*/\1="$HOST_NAME"/" /etc/zabbix/zabbix_agent*.conf
+
+    sed -i "s/^\(Server=\).*/\1"$SERVER_IP"/" /etc/zabbix/zabbix_agent*.conf
+    sed -i "s/^\(ServerActive\).*/\1="$SERVER_IP"/" /etc/zabbix/zabbix_agent*.conf
+    sed -i "s/^\(Hostname\).*/\1="$HOST_NAME"/" /etc/zabbix/zabbix_agent*.conf
 
 # Creating Directories
-mkdir /var/lib/zabbix
-mkdir /var/lib/zabbix/scripts
-chown -R zabbix:zabbix /var/lib/zabbix/
+    mkdir /var/lib/zabbix
+    mkdir /var/lib/zabbix/scripts
+    chown -R zabbix:zabbix /var/lib/zabbix/
 
 # Configure firewalld
 # ---------------------------------------------------\
+
 echo -en "Do you want to configure Firewalld (y/n)? "
-read answer
+    read answer
 if echo "$answer" | grep -iq "^y" ;then
     echo "Configuring..."
 
-firewall-cmd --permanent --zone=public --add-rich-rule 'rule family="ipv4" source address="'$SERVER_IP'" port protocol="tcp" port="10050" accept'
-firewall-cmd --reload
+    firewall-cmd --permanent --zone=public --add-rich-rule 'rule family="ipv4" source address="'$SERVER_IP'" port protocol="tcp" port="10050" accept'
+    firewall-cmd --reload
 
     echo -e "Done."
 
 else
-      echo -e "Nothing to do."
+    echo -e "Nothing to do."
 fi
 
 # Enable and start agent
 # ---------------------------------------------------\
-systemctl enable zabbix-agent && systemctl start zabbix-agent
-# systemctl enable zabbix-agent2 && systemctl start zabbix-agent2 # for agent version 2
+
+    systemctl enable zabbix-agent && systemctl start zabbix-agent
+#   systemctl enable zabbix-agent2 && systemctl start zabbix-agent2 # for agent version 2
 
 # PSK
 # TLSConnect=psk
@@ -209,6 +263,7 @@ systemctl enable zabbix-agent && systemctl start zabbix-agent
 # TLSPSKIdentity=psk001
 # TLSPSKFile=/etc/zabbix/zabbix_agent.psk
 # ---------------------------------------------------\
+
 echo -en "Do you want to secure agent? (y/n)? "
 read answer
 if echo "$answer" | grep -iq "^y" ;then
@@ -222,31 +277,34 @@ if echo "$answer" | grep -iq "^y" ;then
     sed -i "s/# TLSPSKIdentity=.*/TLSPSKIdentity="$PSKIdentity$RAND_PREFIX"/" /etc/zabbix/zabbix_agent*.conf
 
     systemctl restart zabbix-agent
-    # systemctl restart zabbix-agent2 # for agent version 2
+#   systemctl restart zabbix-agent2 # for agent version 2
 
     Info "PSK - $(cat /etc/zabbix/zabbix_agent.psk)"
     Info "PSKIdentity - $PSKIdentity$RAND_PREFIX"
 
 else
-      echo -e "Ok, your agent will be insecure..."
+    echo -e "Ok, your agent will be insecure..."
 fi
 
 # EnableRemoteCommands
+
 echo -en "Do you want to enable remote commands feature? (y/n)? "
 read answer
 if echo "$answer" | grep -iq "^y" ;then
     echo "Enabling remote commands..."
 
-#   sed -i 's/DenyKey=.*/# DenyKey=system.run[*]/' /etc/zabbix/zabbix_agent*.conf # not necessary anymore, it comes enable by default
+    sed -i '93 i AllowKey=system.run[*]' /etc/zabbix/zabbix_agent*.conf
     sed -i 's/# Plugins.SystemRun.LogRemoteCommands=.*/Plugins.SystemRun.LogRemoteCommands=1/' /etc/zabbix/zabbix_agent*.conf
     sed -i 's/# LogRemoteCommands=.*/LogRemoteCommands=1/' /etc/zabbix/zabbix_agent*.conf
     sed -i 's/# User=zabbix.*/User=zabbix/' /etc/zabbix/zabbix_agent*.conf # not working with agent version 2
     sed -i 's/# Timeout=3.*/Timeout=30/' /etc/zabbix/zabbix_agent*.conf
 
 else
-      echo -e "Nothing to do."
+    echo -e "Nothing to do."
 fi
+
 # For MySQL Monitoring
+
 echo -en "Do you want MySQL monitoring? (y/n)? "
 read answer
 if echo "$answer" | grep -iq "^y" ;then
@@ -258,8 +316,7 @@ if echo "$answer" | grep -iq "^y" ;then
     user=zabbix
     password=$PASS" >> /var/lib/zabbix/.my.cnf
 
-    chown -R zabbix:zabbix /var/lib/zabbix/.my.cnf
-    
+    chown -R zabbix:zabbix /var/lib/zabbix/.my.cnf 
     cp /tmp/zabbix-templates/zabbix-template-mysql-galera_cluster-linux/userparameter_mysql.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
         
     mysql -e "CREATE USER 'zabbix'@'localhost' IDENTIFIED BY '$PASS';"
@@ -269,10 +326,11 @@ if echo "$answer" | grep -iq "^y" ;then
     echo "Done."
 
 else
-      echo -e "Nothing to do."
+    echo -e "Nothing to do."
 fi
 
 # For NGINX Monitoring
+
 echo -en "Do you want NGINX monitoring? (y/n)? "
 read answer
 if echo "$answer" | grep -iq "^y" ;then
@@ -288,6 +346,7 @@ else
 fi    
 
 # For PHP-FPM Monitoring
+
 echo -en "Do you want PHP-FPM monitoring? (y/n)? "
 read answer
 if echo "$answer" | grep -iq "^y" ;then
@@ -299,7 +358,8 @@ if echo "$answer" | grep -iq "^y" ;then
     chown -R zabbix:zabbix /var/lib/zabbix/scripts/zabbix_php_fpm_*.sh
     chmod a+x /var/lib/zabbix/scripts/zabbix_php_fpm_*.sh
     
-    #Grant privileges to the PHP-FPM auto discovery script only
+    # Grant privileges to the PHP-FPM auto discovery script only
+    
     echo 'zabbix ALL = NOPASSWD: /var/lib/zabbix/scripts/zabbix_php_fpm_discovery.sh' >> /etc/sudoers
     echo 'zabbix ALL = NOPASSWD: /var/lib/zabbix/scripts/zabbix_php_fpm_status.sh' >> /etc/sudoers
 
@@ -311,6 +371,7 @@ else
 fi    
 
 # For Cpanel Monitoring
+
 echo -en "Do you want Cpanel monitoring? (y/n)? "
 read answer
 if echo "$answer" | grep -iq "^y" ;then
@@ -334,6 +395,7 @@ else
 fi    
 
 # For Advanced Disk Monitoring
+
 echo -en "Do you want advanced disk monitoring? (y/n)? "
 read answer
 if echo "$answer" | grep -iq "^y" ;then
@@ -352,6 +414,7 @@ else
 fi
 
 # For Postfix Monitoring
+
 echo -en "Do you want Postfix monitoring? (y/n)? "
 read answer
 if echo "$answer" | grep -iq "^y" ;then
@@ -369,7 +432,6 @@ if echo "$answer" | grep -iq "^y" ;then
 # Grant privileges to the script only
     echo 'zabbix  ALL=(ALL) NOPASSWD: /var/lib/zabbix/scripts/zabbix-postfix-stats.sh' >> /etc/sudoers  
 
-
     echo "Done."
 
 else
@@ -380,19 +442,22 @@ fi
 # We can add more choice for service monitoring in here.
 # ---------------------------------------------------\
 
-# Delete unnecessary files 
-rm -rf /tmp/zabbix-templates
+    # Delete unnecessary files 
 
-systemctl restart zabbix-agent
-# for agent version 2
-# systemctl restart zabbix-agent2 
+    rm -rf /tmp/zabbix-templates
+
+    # Restart Zabbix Agent    
+    systemctl restart zabbix-agent
+#   systemctl restart zabbix-agent2  # for agent version 2
+
 
 # Final
 # ---------------------------------------------------\
+
 echo -e ""
-Info "Done!"
-Info "Zabbix Agent Status: $(systemctl status zabbix-agent | awk 'NR==3')"
-# Info "Zabbix Agent Status: $(systemctl status zabbix-agent2 | awk 'NR==3')" # for agent version 2
-Info "Now, you must add this host to your Zabbix server in the Configuration > Hosts area"
-Info "This server IP - $HOST_IP"
-Info "This server name - $HOST_NAME"
+    Info "Done!"
+    Info "Zabbix Agent Status: $(systemctl status zabbix-agent | awk 'NR==3')"
+#   Info "Zabbix Agent Status: $(systemctl status zabbix-agent2 | awk 'NR==3')" # for agent version 2
+    Info "Now, you must add this host to your Zabbix server in the Configuration > Hosts area"
+    Info "This server IP - $HOST_IP"
+    Info "This server name - $HOST_NAME"
