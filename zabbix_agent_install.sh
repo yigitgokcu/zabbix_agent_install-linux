@@ -320,7 +320,7 @@ if echo "$answer" | grep -iq "^y" ;then
     cp /tmp/zabbix-templates/zabbix-template-mysql-galera_cluster-linux/userparameter_mysql.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
         
     mysql -e "CREATE USER 'zabbix'@'localhost' IDENTIFIED BY '$PASS';"
-    mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'zabbix'@'localhost';"
+    mysql -e "GRANT USAGE,REPLICATION CLIENT,PROCESS,SHOW DATABASES,SHOW VIEW ON *.* TO 'zabbix'@'localhost';"
     mysql -e "FLUSH PRIVILEGES;"
 
     echo "Done."
