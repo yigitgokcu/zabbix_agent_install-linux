@@ -440,6 +440,26 @@ else
 
 fi
 
+# For Exim Monitoring
+
+echo -en "Do you want Exim monitoring? (y/n)? "
+read answer
+if echo "$answer" | grep -iq "^y" ;then
+    echo "Creating necessary files..."
+
+    mkdir /var/lib/zabbix/scripts/zabbix_exim-stats
+    git clone https://github.com/yigitgokcu/zabbix-templates.git /tmp/zabbix-templates
+    cp /tmp/zabbix-templates/zabbix-template-exim-linux/zabbix_exim-stats.sh  /var/lib/zabbix/scripts/zabbix_exim-stats
+    chown -R zabbix:zabbix /var/lib/zabbix/scripts/zabbix_exim-stats/zabbix_exim-stats.sh
+    chmod a+x /var/lib/zabbix/scripts/zabbix_exim-stats/zabbix_exim-stats.sh
+
+    echo "Done."
+
+else
+    echo -e "Nothing to do."
+
+fi
+
 # We can add more choice for service monitoring in here.
 # ---------------------------------------------------\
 
