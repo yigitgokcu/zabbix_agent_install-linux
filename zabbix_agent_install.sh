@@ -129,7 +129,7 @@ if [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'
     cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
 
   # Add CronJob (Ubuntu)
-    (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d " " -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
+    (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d ' ' -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
 
 elif [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o bionic) == "Bionic" ]] ; then
 
@@ -147,7 +147,7 @@ elif [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==2 {print $3
     cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
 
     # Add CronJob (Ubuntu)
-    (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d " " -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
+    (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d ' ' -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
 
 elif [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o focal) == "Focal" ]] ; then
 
@@ -165,7 +165,7 @@ elif [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==2 {print $3
     cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
 
 #   Add CronJob (Ubuntu)
-    (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d " " -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
+    (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d ' ' -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
 fi
 
 # Only run it on (Debian)
@@ -185,7 +185,7 @@ if [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==1 {print $4}'
     cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
 
   # Add CronJob (Debian)
-    (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d " " -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
+    (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d ' ' -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
 
 elif [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==1 {print $4}'| grep -i -o stretch) == "Stretch" ]] ; then
 
@@ -203,7 +203,7 @@ elif [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==1 {print $4
     cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
 
     # Add CronJob (Debian)
-    (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d " " -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
+    (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d ' ' -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
 
 elif [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==1 {print $4}'| grep -i -o jessie) == "Jessie" ]] ; then
 
@@ -220,7 +220,7 @@ elif [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==1 {print $4
     cp /tmp/zabbix-templates/zabbix-template-check-updates-linux/userparameter_checkupdates.conf $(find /etc/zabbix/ -name zabbix_agentd*.d -type d | head -n1)
 
 #   Add CronJob (Debian)
-    (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d " " -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
+    (crontab -u root -l; echo "0 4 * * * sudo /usr/bin/apt-get upgrade -s | grep -P '^\d+ upgraded' | cut -d ' ' -f1 > /var/lib/zabbix/zabbix.count.updates" ) | crontab -u root - 
 fi
 
 # Configure local zabbix agent
