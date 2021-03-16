@@ -448,12 +448,40 @@ if echo "$answer" | grep -iq "^y" ;then
     echo "Creating necessary files..."
 
     mkdir /var/lib/zabbix/scripts/zabbix_exim-stats
-    git clone https://github.com/yigitgokcu/zabbix-templates.git /tmp/zabbix-templates
     cp /tmp/zabbix-templates/zabbix-template-exim-linux/zabbix_exim-stats.sh  /var/lib/zabbix/scripts/zabbix_exim-stats
     chown -R zabbix:zabbix /var/lib/zabbix/scripts/zabbix_exim-stats/zabbix_exim-stats.sh
     chmod a+x /var/lib/zabbix/scripts/zabbix_exim-stats/zabbix_exim-stats.sh
 
+# Add CronJob
+    (crontab -u root -l; echo "*/5 * * * * /var/lib/zabbix/scripts/zabbix_exim-stats/zabbix_exim-stats.sh >/dev/null" ) | crontab -u root -
+
     echo "Done."
+
+else
+    echo -e "Nothing to do."
+
+fi
+
+# For Zimbra Monitoring
+
+echo -en "Do you want Zimbra monitoring? (y/n)? "
+read answer
+if echo "$answer" | grep -iq "^y" ;then
+    echo "Creating necessary files..."
+
+    mkdir /var/lib/zabbix/scripts/zabbix_zimbra
+    cp /tmp/zabbix-templates/zabbix-template-zimbra-linux/zabbix_zimbra-*.sh  /var/lib/zabbix/scripts/zabbix_zimbra
+    chown -R zabbix:zabbix /var/lib/zabbix/scripts/zabbix_zimbra-stats/zabbix_zimbra-*.sh
+    chmod a+x /var/lib/zabbix/scripts/zabbix_zimbra-stats/zabbix_zimbra-*.sh
+    
+# Grant privileges to the script only
+    echo 'zabbix ALL=NOPASSWD: /opt/zimbra/common/bin/pflogsumm.pl, /var/lib/zabbix/scripts/zabbix_zimbra/zabbix_zimbra-stats.sh' >> /etc/sudoers 
+    echo 'zabbix ALL=NOPASSWD: /var/lib/zabbix/scripts/zabbix_zimbra/zabbix_zimbra-services.sh' >> /etc/sudoers
+
+# Add CronJob
+    (crontab -u root -l; echo "* * * * * /var/lib/zabbix/scripts/zabbix_zimbra/zabbix_zimbra-get-stats.sh HOSTNAME >/dev/null 2>&1" ) | crontab -u root -
+
+     echo "Done."
 
 else
     echo -e "Nothing to do."
