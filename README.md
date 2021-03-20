@@ -1,5 +1,4 @@
-# zabbix_agent_install-linux
-Zabbix Agent Installation Script in a linux environment
+#### Zabbix Agent Installation Script in a linux environment
 
 ## Usage
 ```
