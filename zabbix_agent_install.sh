@@ -336,7 +336,7 @@ read answer
 if echo "$answer" | grep -iq "^y" ;then
     echo "Creating necessary files..."
 
-    cp /tmp/zabbix-templates/zabbix-template-nginx-linux/zabbix-nginx/statistics.conf /etc/nginx/conf.d/ && service nginx restart
+    cp /tmp/zabbix-templates/zabbix-template-nginx-linux/zabbix-nginx/status.conf /etc/nginx/conf.d/ && service nginx restart
      
     echo "Done."
 
