@@ -83,7 +83,7 @@ fi
 
 if [ -x /usr/bin/yum ] && [[ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '7') == "7" ]] ; then
 
-    rpm -Uvh https://repo.zabbix.com/zabbix/5.2/rhel/7/x86_64/zabbix-release-5.2-1.el7.noarch.rpm
+    rpm -Uvh https://repo.zabbix.com/zabbix/5.4/rhel/7/x86_64/zabbix-release-5.4-1.el7.noarch.rpm
     yum clean all
 
     yum install zabbix-agent -y
@@ -98,7 +98,7 @@ if [ -x /usr/bin/yum ] && [[ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| gr
 
 elif [ -x /usr/bin/dnf ] && [[ $(cat /etc/os-release  | awk 'NR==2 {print $1}'| grep -i -o '8') == "8" ]] ; then
 
-    rpm -Uvh https://repo.zabbix.com/zabbix/5.2/rhel/8/x86_64/zabbix-release-5.2-1.el8.noarch.rpm
+    rpm -Uvh https://repo.zabbix.com/zabbix/5.4/rhel/8/x86_64/zabbix-release-5.4-1.el8.noarch.rpm
     dnf clean all
 
     dnf install zabbix-agent -y
@@ -116,8 +116,8 @@ fi
 
 if [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o xenial) == "Xenial" ]] ; then
   
-    wget https://repo.zabbix.com/zabbix/5.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.2-1+ubuntu16.04_all.deb 
-    dpkg -i zabbix-release_5.2-1+ubuntu16.04_all.deb
+    wget https://repo.zabbix.com/zabbix/5.4/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.4-1+ubuntu16.04_all.deb
+    dpkg -i zabbix-release_5.4-1+ubuntu16.04_all.deb
   
     apt-get update
     apt install zabbix-agent -y
@@ -133,8 +133,8 @@ if [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'
 
 elif [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o bionic) == "Bionic" ]] ; then
 
-    wget https://repo.zabbix.com/zabbix/5.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.2-1+ubuntu18.04_all.deb
-    dpkg -i zabbix-release_5.2-1+ubuntu18.04_all.deb
+    wget https://repo.zabbix.com/zabbix/5.4/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.4-1+ubuntu18.04_all.deb
+    dpkg -i zabbix-release_5.4-1+ubuntu18.04_all.deb
 
     apt-get update
     apt install zabbix-agent -y
@@ -151,8 +151,8 @@ elif [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==2 {print $3
 
 elif [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==2 {print $3}'| grep -i -o focal) == "Focal" ]] ; then
 
-    wget https://repo.zabbix.com/zabbix/5.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.2-1+ubuntu20.04_all.deb
-    dpkg -i zabbix-release_5.2-1+ubuntu20.04_all.deb
+    wget https://repo.zabbix.com/zabbix/5.4/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.4-1+ubuntu20.04_all.deb
+    dpkg -i zabbix-release_5.4-1+ubuntu20.04_all.deb
 
     apt-get update
     apt install zabbix-agent -y
@@ -172,8 +172,8 @@ fi
 
 if [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==1 {print $4}'| grep -i -o buster) == "Buster" ]] ; then
   
-    wget https://repo.zabbix.com/zabbix/5.2/debian/pool/main/z/zabbix-release/zabbix-release_5.2-1+debian10_all.deb
-    dpkg -i zabbix-release_5.2-1+debian10_all.deb
+    wget https://repo.zabbix.com/zabbix/5.4/debian/pool/main/z/zabbix-release/zabbix-release_5.4-1+debian10_all.deb
+    dpkg -i zabbix-release_5.4-1+debian10_all.deb
    
     apt-get update
     apt install zabbix-agent -y
@@ -189,8 +189,8 @@ if [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==1 {print $4}'
 
 elif [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==1 {print $4}'| grep -i -o stretch) == "Stretch" ]] ; then
 
-    wget https://repo.zabbix.com/zabbix/5.2/debian/pool/main/z/zabbix-release/zabbix-release_5.2-1+debian9_all.deb
-    dpkg -i zabbix-release_5.2-1+debian9_all.deb
+    wget https://repo.zabbix.com/zabbix/5.4/debian/pool/main/z/zabbix-release/zabbix-release_5.4-1+debian9_all.deb
+    dpkg -i zabbix-release_5.4-1+debian9_all.deb
 
     apt-get update
     apt install zabbix-agent -y
@@ -207,8 +207,8 @@ elif [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==1 {print $4
 
 elif [ -x /usr/bin/apt-get ] && [[ $(cat /etc/os-release  | awk 'NR==1 {print $4}'| grep -i -o jessie) == "Jessie" ]] ; then
 
-    wget https://repo.zabbix.com/zabbix/5.2/debian/pool/main/z/zabbix-release/zabbix-release_5.2-1+debian8_all.deb
-    dpkg -i zabbix-release_5.2-1+debian8_all.deb
+    wget https://repo.zabbix.com/zabbix/5.4/debian/pool/main/z/zabbix-release/zabbix-release_5.4-1+debian8_all.deb
+    dpkg -i zabbix-release_5.4-1+debian8_all.deb
 
     apt-get update
     apt install zabbix-agent -y
